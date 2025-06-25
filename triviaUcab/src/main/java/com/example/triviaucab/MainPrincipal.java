@@ -1,4 +1,4 @@
-package com.example.juegotriviaucab;
+package com.example.triviaucab;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
