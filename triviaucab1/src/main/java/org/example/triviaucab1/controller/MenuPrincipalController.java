@@ -26,7 +26,7 @@ public class MenuPrincipalController {
     private void handleNuevaPartida(ActionEvent event) {
         System.out.println("Botón 'Partida nueva' presionado. Cargando selección de jugadores.");
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/triviaucab/vista/PartidaNuevaView.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/org/example/triviaucab1/PartidaNuevaView.fxml"));
             Scene scene = new Scene(fxmlLoader.load()); // Tamaño predeterminado o especificado
             Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow(); // Obtiene el Stage actual
             stage.setScene(scene);

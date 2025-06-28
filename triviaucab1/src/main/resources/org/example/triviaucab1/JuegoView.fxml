@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.triviaucab1.controller.JuegoController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+    <children>
+        <StackPane HBox.hgrow="ALWAYS">
+            <children>
+                <Label text="¡Aquí iría tu tablero de juego!" style="-fx-font-size: 20px; -fx-text-fill: gray;" />
+            </children>
+        </StackPane>
+
+        <VBox alignment="TOP_CENTER" spacing="15.0" prefWidth="300.0">
+            <children>
+                <Label text="Información del Juego" style="-fx-font-size: 24px; -fx-font-weight: bold;" />
+                <Label text="Turno de:" style="-fx-font-weight: bold;"/>
+                <Label fx:id="jugadorEnTurnoLabel" text="[Jugador Actual]" />
+
+                <Label text="Categorías Obtenidas:" style="-fx-font-weight: bold;"/>
+                <VBox fx:id="categoriasJugadorVBox" spacing="5.0">
+                    <Label text="Categoría A (Azul)" />
+                    <Label text="Categoría B (Verde)" />
+                </VBox>
+
+                <Label text="Tiempo de Respuesta Correcta (Total):" style="-fx-font-weight: bold;"/>
+                <Label fx:id="tiempoRespuestaLabel" text="00:00" />
+
+                <VBox spacing="10.0" alignment="CENTER" VBox.vgrow="ALWAYS">
+                    <Button mnemonicParsing="false" onAction="#handleFinalizarPartida" text="Finalizar Partida" prefWidth="150.0" prefHeight="40.0"/>
+                    <Button mnemonicParsing="false" onAction="#handleRendicion" text="Rendición" prefWidth="150.0" prefHeight="40.0"/>
+                    <Button mnemonicParsing="false" onAction="#handleRegresar" text="Regresar" prefWidth="150.0" prefHeight="40.0"/>
+                    <Button mnemonicParsing="false" onAction="#handleSalir" text="Salir" prefWidth="150.0" prefHeight="40.0"/>
+                </VBox>
+            </children>
+        </VBox>
+    </children>
+</HBox>

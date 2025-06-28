@@ -11,8 +11,6 @@ import javafx.scene.control.ListView;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Controlador para la ventana de selección de jugadores para una nueva partida.
