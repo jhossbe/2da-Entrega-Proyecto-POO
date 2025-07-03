@@ -25,7 +25,7 @@ public class MainPrincipal extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(MainPrincipal.class.getResource("hello-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
         stage.setTitle("Tablero");
-        stage.setScene(scene);
+        stage.setScene(scene); hola
         stage.setMaximized(true);
         stage.show();
     }
