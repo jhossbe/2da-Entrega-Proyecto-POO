@@ -11,7 +11,7 @@ public class MainPrincipal extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("MenuPrincipalView.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 1200, 800);
+        Scene scene = new Scene(fxmlLoader.load());
         stage.setTitle("TRIVIA UCAB - Menú Principal");
         stage.setScene(scene);
         stage.setMaximized(true);

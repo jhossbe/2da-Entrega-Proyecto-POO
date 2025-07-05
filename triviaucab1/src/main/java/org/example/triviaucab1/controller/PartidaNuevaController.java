@@ -117,7 +117,7 @@ public class PartidaNuevaController implements Initializable {
             Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(juegoRoot));
             stage.setTitle("TRIVIA UCAB - El Juego");
-            stage.setMaximized(true);
+            stage.setFullScreen(true);
             stage.show();
 
         } catch (IOException e) {
@@ -164,7 +164,7 @@ public class PartidaNuevaController implements Initializable {
                 Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
                 stage.setScene(new Scene(menuPrincipalRoot));
                 stage.setTitle("TRIVIA UCAB - Menú Principal");
-                stage.setMaximized(true);
+                stage.setFullScreen(true);
                 stage.show();
             } catch (IOException e) {
                 System.err.println("Error al cargar la ventana del Menú Principal: " + e.getMessage());

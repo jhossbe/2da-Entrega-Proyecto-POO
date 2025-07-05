@@ -85,11 +85,14 @@ public class JuegoController {
     private void handleRegresar(ActionEvent event) {
         System.out.println("Botón 'Regresar' presionado. Volviendo al menú principal.");
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("MenuPrincipalView.fxml"));
+            // Asumiendo que MenuPrincipalView.fxml está en el mismo paquete 'controller'
+            // o si lo mueves a un paquete 'view' dentro de 'org.example.triviaucab1'
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/org/example/triviaucab1/MenuPrincipalView.fxml")); // O "/org/example/triviaucab1/view/MenuPrincipalView.fxml" si creas esa carpeta
             Scene scene = new Scene(fxmlLoader.load());
             Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
             stage.setScene(scene);
             stage.setTitle("TRIVIA UCAB - Menú Principal");
+            stage.setFullScreen(true);
             stage.show();
         } catch (IOException e) {
             System.err.println("Error al cargar la ventana del Menú Principal: " + e.getMessage());
