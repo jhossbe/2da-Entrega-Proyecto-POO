@@ -1,0 +1,35 @@
+[
+  {
+    "email": "jugador1@example.com",
+    "alias": "Jugador1",
+    "quesitos": [],
+    "estadisticas": {
+      "partidasJugadas": 0,
+      "partidasGanadas": 0,
+      "preguntasCorrectas": 0,
+      "preguntasIncorrectas": 0
+    }
+  },
+  {
+    "email": "jugador2@example.com",
+    "alias": "Jugador2",
+    "quesitos": ["Geografia"],
+    "estadisticas": {
+      "partidasJugadas": 3,
+      "partidasGanadas": 1,
+      "preguntasCorrectas": 15,
+      "preguntasIncorrectas": 5
+    }
+  },
+  {
+    "email": "jugador3@example.com",
+    "alias": "Jugador3",
+    "quesitos": [],
+    "estadisticas": {
+      "partidasJugadas": 0,
+      "partidasGanadas": 0,
+      "preguntasCorrectas": 0,
+      "preguntasIncorrectas": 0
+    }
+  }
+]

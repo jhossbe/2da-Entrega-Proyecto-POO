@@ -5,131 +5,213 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.stage.Stage;
-
+import org.example.triviaucab1.module.Jugador;
+import org.example.triviaucab1.module.JsonService;
+import org.example.triviaucab1.module.Partida;
 import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
 
 /**
  * Controlador para la ventana de selección de jugadores para una nueva partida.
  * Permite al usuario seleccionar jugadores de una lista de disponibles y pasarlos a una lista de seleccionados.
  */
-public class PartidaNuevaController {
+public class PartidaNuevaController implements Initializable {
 
     @FXML
-    private ListView<String> jugadoresDisponiblesListView;
-
+    private ListView<Jugador> jugadoresDisponiblesListView;
     @FXML
-    private ListView<String> jugadoresSeleccionadosListView;
+    private ListView<Jugador> jugadoresSeleccionadosListView;
 
-    private ObservableList<String> jugadoresDisponibles;
-    private ObservableList<String> jugadoresSeleccionados;
+    private ObservableList<Jugador> jugadoresDisponibles;
+    private ObservableList<Jugador> jugadoresSeleccionados;
+    private JsonService jsonService;
 
     /**
      * Método de inicialización llamado automáticamente por FXMLLoader después de que se carga el FXML.
-     * Aquí se inicializan las listas de jugadores.
+     * Aquí se inicializan las listas de jugadores y se cargan desde el JSON.
      */
-    @FXML
-    public void initialize() {
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        jsonService = new JsonService();
         jugadoresDisponibles = FXCollections.observableArrayList();
         jugadoresSeleccionados = FXCollections.observableArrayList();
 
-        // TODO: En una implementación real, cargar jugadores desde jugadores.json aquí.
-        // Por ahora, añadimos algunos jugadores de ejemplo.
-        jugadoresDisponibles.addAll("Jugador 1", "Jugador 2", "Jugador 3", "Jugador 4", "Jugador 5", "Jugador 6", "Jugador 7", "Jugador 8", "Jugador 9", "Jugador 10");
+        jugadoresDisponiblesListView.setCellFactory(lv -> new ListCell<Jugador>() {
+            @Override
+            protected void updateItem(Jugador jugador, boolean empty) {
+                super.updateItem(jugador, empty);
+                setText(empty ? null : jugador.getAlias());
+            }
+        });
+        jugadoresSeleccionadosListView.setCellFactory(lv -> new ListCell<Jugador>() {
+            @Override
+            protected void updateItem(Jugador jugador, boolean empty) {
+                super.updateItem(jugador, empty);
+                setText(empty ? null : jugador.getAlias());
+            }
+        });
 
+        cargarJugadoresDesdeJson();
+    }
+
+    @FXML
+    private void handleAddPlayer() {
+        Jugador selectedPlayer = jugadoresDisponiblesListView.getSelectionModel().getSelectedItem();
+        if (selectedPlayer != null) {
+            if (!jugadoresSeleccionados.contains(selectedPlayer)) {
+                jugadoresSeleccionados.add(selectedPlayer);
+                jugadoresSeleccionadosListView.setItems(jugadoresSeleccionados);
+                jugadoresDisponibles.remove(selectedPlayer);
+            } else {
+                mostrarAlerta(Alert.AlertType.WARNING, "Jugador Duplicado", "Este jugador ya ha sido añadido a la lista de seleccionados.");
+            }
+        } else {
+            mostrarAlerta(Alert.AlertType.WARNING, "Selección Vacía", "Por favor, selecciona un jugador de la lista de disponibles.");
+        }
+    }
+
+    /**
+     * Carga los jugadores desde el archivo JSON y los añade a la lista de disponibles.
+     */
+    private void cargarJugadoresDesdeJson() {
+        List<Jugador> loadedPlayers = jsonService.cargarJugadores();
+        jugadoresDisponibles.addAll(loadedPlayers);
         jugadoresDisponiblesListView.setItems(jugadoresDisponibles);
-        jugadoresSeleccionadosListView.setItems(jugadoresSeleccionados);
     }
 
     /**
      * Añade el jugador seleccionado de la lista de disponibles a la lista de seleccionados.
      */
     @FXML
-    private void handleAddPlayer() {
-        String selectedPlayer = jugadoresDisponiblesListView.getSelectionModel().getSelectedItem();
-        if (selectedPlayer != null && !jugadoresSeleccionados.contains(selectedPlayer)) {
-            jugadoresSeleccionados.add(selectedPlayer);
-            // Si quieres que el jugador no esté disponible una vez seleccionado:
-            // jugadoresDisponibles.remove(selectedPlayer);
+    private void handleJugar(ActionEvent event) {
+        if (jugadoresSeleccionados.isEmpty()) {
+            mostrarAlerta(Alert.AlertType.WARNING, "Sin Jugadores", "Debes seleccionar al menos un jugador para iniciar la partida.");
+            return;
+        }
+
+        Partida nuevaPartida = new Partida();
+        nuevaPartida.iniciar(new ArrayList<>(jugadoresSeleccionados));
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/triviaucab1/JuegoView.fxml"));
+            Parent juegoRoot = loader.load();
+
+            JuegoController juegoController = loader.getController();
+            if (juegoController != null) {
+                juegoController.setPartida(nuevaPartida);
+            }
+
+            Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(juegoRoot));
+            stage.setTitle("TRIVIA UCAB - El Juego");
+            stage.setMaximized(true);
+            stage.show();
+
+        } catch (IOException e) {
+            mostrarAlerta(Alert.AlertType.ERROR, "Error al Cargar Juego", "No se pudo cargar la vista del juego.", "Detalles: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     /**
-     * Remueve el jugador seleccionado de la lista de seleccionados y lo devuelve a la lista de disponibles.
+     * Remueve el jugador seleccionado de la lista de seleccionados.
      */
     @FXML
     private void handleRemovePlayer() {
-        String selectedPlayer = jugadoresSeleccionadosListView.getSelectionModel().getSelectedItem();
+        Jugador selectedPlayer = jugadoresSeleccionadosListView.getSelectionModel().getSelectedItem();
         if (selectedPlayer != null) {
             jugadoresSeleccionados.remove(selectedPlayer);
-            // Si quieres que el jugador vuelva a estar disponible:
-            // if (!jugadoresDisponibles.contains(selectedPlayer)) {
-            //     jugadoresDisponibles.add(selectedPlayer);
-            // }
-        }
-    }
-
-    /**
-     * Maneja la acción cuando el botón "Jugar" es presionado.
-     * Carga la ventana del juego (tablero).
-     * @param event El evento de acción que disparó este método.
-     */
-    @FXML
-    private void handleJugar(ActionEvent event) {
-        if (jugadoresSeleccionados.isEmpty()) {
-            System.out.println("No se han seleccionado jugadores.");
-            // TODO: Mostrar una alerta al usuario.
-            return;
-        }
-        System.out.println("Botón 'Jugar' presionado. Cargando juego con jugadores: " + jugadoresSeleccionados);
-        // Aquí pasarías la lista de jugadores seleccionados al modelo o al siguiente controlador.
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/triviaucab/vista/JuegoView.fxml"));
-            Scene scene = new Scene(fxmlLoader.load());
-            Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
-            stage.setScene(scene);
-            stage.setTitle("TRIVIA UCAB - El Juego");
-            // stage.setFullScreen(true); // Opcional, para que el juego sea maximizado.
-            stage.show();
-        } catch (IOException e) {
-            System.err.println("Error al cargar la ventana del Juego: " + e.getMessage());
-            e.printStackTrace();
+            jugadoresSeleccionadosListView.setItems(jugadoresSeleccionados);
+            if (!jugadoresDisponibles.contains(selectedPlayer)) {
+                jugadoresDisponibles.add(selectedPlayer);
+            }
+        } else {
+            mostrarAlerta(Alert.AlertType.WARNING, "Selección Vacía", "Por favor, selecciona un jugador de la lista de seleccionados para quitar.");
         }
     }
 
     /**
      * Maneja la acción cuando el botón "Regresar" es presionado.
-     * Retorna a la ventana principal.
+     * Retorna a la ventana principal (Menú Principal).
+     *
      * @param event El evento de acción que disparó este método.
      */
     @FXML
     private void handleRegresar(ActionEvent event) {
-        System.out.println("Botón 'Regresar' presionado. Volviendo al menú principal.");
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/triviaucab/vista/MenuPrincipalView.fxml"));
-            Scene scene = new Scene(fxmlLoader.load());
-            Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
-            stage.setScene(scene);
-            stage.setTitle("TRIVIA UCAB - Menú Principal");
-            stage.show();
-        } catch (IOException e) {
-            System.err.println("Error al cargar la ventana del Menú Principal: " + e.getMessage());
-            e.printStackTrace();
+       Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+       alert.setTitle("Confirmar Regreso");
+       alert.setHeaderText("¿Estás seguro que deseas regresar al menú principal?");
+       alert.setContentText("Se perderá la selección actual de jugadores.");
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/org/example/triviaucab1/MenuPrincipalView.fxml"));
+                Parent menuPrincipalRoot = fxmlLoader.load();
+                Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+                stage.setScene(new Scene(menuPrincipalRoot));
+                stage.setTitle("TRIVIA UCAB - Menú Principal");
+                stage.setMaximized(true);
+                stage.show();
+            } catch (IOException e) {
+                System.err.println("Error al cargar la ventana del Menú Principal: " + e.getMessage());
+                e.printStackTrace();
+                new Alert(Alert.AlertType.ERROR, "Error interno: No se pudo cargar la vista del menú principal. Revisa la ruta del FXML en el código. Detalles: " + e.getMessage()).showAndWait();
+            }
         }
     }
 
     /**
      * Maneja la acción cuando el botón "Salir" es presionado.
-     * Cierra la aplicación.
+     * Cierra la aplicación con una confirmación.
+     *
      * @param event El evento de acción que disparó este método.
      */
     @FXML
     private void handleSalir(ActionEvent event) {
-        System.out.println("Botón 'Salir' presionado. Cerrando aplicación.");
-        Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
-        stage.close();
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirmar Salida");
+        alert.setHeaderText("¿Estás seguro que deseas salir de la aplicación?");
+        alert.setContentText("Se cerrará la ventana actual.");
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+            stage.close();
+            // System.exit(0);
+        }
+    }
+
+    /**
+     * Muestra una alerta al usuario.
+     *
+     * @param tipo      Tipo de alerta (INFORMATION, WARNING, ERROR, CONFIRMATION).
+     * @param titulo    Título de la ventana de alerta.
+     * @param encabezado Texto del encabezado de la alerta.
+     * @param contenido Contenido principal de la alerta.
+     */
+    private void mostrarAlerta(Alert.AlertType tipo, String titulo, String encabezado, String contenido) {
+        Alert alert = new Alert(tipo);
+        alert.setTitle(titulo);
+        alert.setHeaderText(encabezado);
+        alert.setContentText(contenido);
+        alert.showAndWait();
+    }
+
+    private void mostrarAlerta(Alert.AlertType tipo, String titulo, String encabezado) {
+        mostrarAlerta(tipo, titulo, encabezado, null);
     }
 }

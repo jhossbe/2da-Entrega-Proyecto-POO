@@ -27,11 +27,11 @@ public class MenuPrincipalController {
         System.out.println("Botón 'Partida nueva' presionado. Cargando selección de jugadores.");
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/org/example/triviaucab1/PartidaNuevaView.fxml"));
-            Scene scene = new Scene(fxmlLoader.load()); // Tamaño predeterminado o especificado
-            Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow(); // Obtiene el Stage actual
+            Scene scene = new Scene(fxmlLoader.load());
+            Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
             stage.setScene(scene);
             stage.setTitle("TRIVIA UCAB - Selección de Jugadores");
-            // stage.setFullScreen(true); // Si quieres que la ventana de selección de jugadores sea maximizada
+            stage.setFullScreen(true);
             stage.show();
         } catch (IOException e) {
             System.err.println("Error al cargar la ventana de Partida Nueva: " + e.getMessage());
@@ -48,7 +48,7 @@ public class MenuPrincipalController {
     private void handlePartidaGuardada(ActionEvent event) {
         System.out.println("Botón 'Partida guardada' presionado. Cargando partida.");
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/triviaucab/vista/PartidaGuardadaView.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/triviaucab1/PartidaGuardadaView.fxml"));
             Scene scene = new Scene(fxmlLoader.load());
             Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
             stage.setScene(scene);
@@ -69,7 +69,7 @@ public class MenuPrincipalController {
     private void handleEstadisticas(ActionEvent event) {
         System.out.println("Botón 'Estadísticas' presionado. Cargando estadísticas.");
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/triviaucab/vista/EstadisticasView.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/org/example/triviaucab1/EstadisticasView.fxml"));
             Scene scene = new Scene(fxmlLoader.load());
             Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
             stage.setScene(scene);

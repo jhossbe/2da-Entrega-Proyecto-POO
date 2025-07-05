@@ -10,12 +10,14 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import org.example.triviaucab1.module.Partida;
 
 /**
  * Controlador para la ventana principal del juego (el tablero).
  * Maneja las interacciones durante el desarrollo de la partida.
  */
 public class JuegoController {
+    private Partida partidaActual;
 
     @FXML
     private Label jugadorEnTurnoLabel;
@@ -24,17 +26,33 @@ public class JuegoController {
     @FXML
     private Label tiempoRespuestaLabel;
 
+
+    /**
+     * Método para recibir la instancia de la Partida desde PartidaNuevaController.
+     * ESTE ES EL MÉTODO QUE NECESITAS AÑADIR/VERIFICAR.
+     * @param partida La instancia de la Partida que se va a jugar.
+     */
+    public void setPartida(Partida partida) {
+        this.partidaActual = partida;
+        System.out.println("Partida recibida en JuegoController. Jugadores: " + partida.getJugadores().size());
+
+    }
+
     /**
      * Método de inicialización llamado automáticamente por FXMLLoader después de que se carga el FXML.
      * Aquí se inicializaría el estado del juego.
      */
     @FXML
     public void initialize() {
-        System.out.println("Ventana de Juego inicializada.");
-        // TODO: Cargar el estado inicial del juego, el jugador en turno, categorías, etc.
-        // Esto vendría del modelo.
-        jugadorEnTurnoLabel.setText("Jugador X"); // Ejemplo
-        tiempoRespuestaLabel.setText("00:00"); // Ejemplo
+        // Es buena práctica verificar si las Labels no son null antes de usarlas
+        // Aunque si todo está bien en el FXML y la declaración @FXML, no deberían serlo.
+        if (jugadorEnTurnoLabel != null) {
+            jugadorEnTurnoLabel.setText("Cargando juego...");
+        }
+        if (tiempoRespuestaLabel != null) {
+            tiempoRespuestaLabel.setText("Tiempo: --");
+        }
+        System.out.println("JuegoController inicializado.");
     }
 
     /**
@@ -67,7 +85,7 @@ public class JuegoController {
     private void handleRegresar(ActionEvent event) {
         System.out.println("Botón 'Regresar' presionado. Volviendo al menú principal.");
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/triviaucab/vista/MenuPrincipalView.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("MenuPrincipalView.fxml"));
             Scene scene = new Scene(fxmlLoader.load());
             Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
             stage.setScene(scene);

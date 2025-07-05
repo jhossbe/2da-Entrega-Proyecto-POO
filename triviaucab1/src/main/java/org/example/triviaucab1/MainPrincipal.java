@@ -11,25 +11,12 @@ public class MainPrincipal extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("MenuPrincipalView.fxml"));
-
-        Scene scene = new Scene(fxmlLoader.load(), 800, 600);
-
+        Scene scene = new Scene(fxmlLoader.load(), 1200, 800);
         stage.setTitle("TRIVIA UCAB - Menú Principal");
         stage.setScene(scene);
-        // stage.setMaximized(true);
-        stage.show();
-    }
-
-    /**
-    public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(MainPrincipal.class.getResource("hello-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load());
-        stage.setTitle("Tablero");
-        stage.setScene(scene); hola
         stage.setMaximized(true);
         stage.show();
     }
-    **/
     public static void main(String[] args) {
         launch();
     }

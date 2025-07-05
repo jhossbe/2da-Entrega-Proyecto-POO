@@ -74,7 +74,7 @@ public class EstadisticasController {
     private void handleRegresar(ActionEvent event) {
         System.out.println("Botón 'Regresar' presionado. Volviendo al menú principal.");
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/triviaucab/vista/MenuPrincipalView.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/org/example/triviaucab1/MenuPrincipalView.fxml"));
             Scene scene = new Scene(fxmlLoader.load());
             Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
             stage.setScene(scene);
