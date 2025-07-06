@@ -1,184 +1,47 @@
-/*
-
-Clase dado hay que implementarla
-
 package org.example.triviaucab1.controller;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.Button; // Importar Button
-import java.util.Random; // Importar Random para generar números aleatorios
 
+import java.util.Random;
+
+/**
+ * Controlador del dado del juego.
+ * Se encarga de lanzar el dado y notificar al controlador principal del juego (JuegoController)
+ * para mostrar las casillas a las que puede avanzar el jugador.
+ */
 public class DadoController {
 
     @FXML
-    private Label welcomeText;
+    private Button diceButton;
 
     @FXML
-    private Button diceButton; // Conectar el botón del dado
-    @FXML
-    private Label diceResultLabel; // Conectar la etiqueta del resultado del dado
+    private Label diceResultLabel;
 
-    // Método para simular el lanzamiento del dado
+    private JuegoController juegoController;
+
+    /**
+     * Conecta este controlador con el controlador principal del juego.
+     * @param juegoController referencia al JuegoController
+     */
+    public void setJuegoController(JuegoController juegoController) {
+        this.juegoController = juegoController;
+    }
+
+    /**
+     * Lanza el dado al presionar el botón y muestra los movimientos posibles en el tablero.
+     */
     @FXML
     protected void rollDice() {
-        Random random = new Random();
-        int randomNumber = random.nextInt(6) + 1; // Genera un número entre 1 y 6
-        diceResultLabel.setText(String.valueOf(randomNumber)); // Actualiza la etiqueta con el número
-        System.out.println("El dado ha lanzado: " + randomNumber); // Opcional: imprimir en consola
-    }
+        int resultado = new Random().nextInt(6) + 1;
+        diceResultLabel.setText(String.valueOf(resultado));
+        System.out.println("🎲 El dado lanzó: " + resultado);
 
-    // Este método ya estaba, puedes mantenerlo si lo usas en otra parte
-    @FXML
-    protected void onHelloButtonClick() {
-        welcomeText.setText("Welcome to JavaFX Application!");
+        if (juegoController != null) {
+            juegoController.lanzarYMostrarMovimientos(resultado);
+        } else {
+            System.err.println("ERROR: JuegoController no está conectado a DadoController.");
+        }
     }
 }
-Codigo viewer con dado (Hay que implementarlo)
-<?xml version="1.0" encoding="UTF-8"?>
-
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.shape.*?>
-<?import javafx.scene.text.*?>
-
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="721.0" prefWidth="1442.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.poo1234.HelloController">
-   <children>
-      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#5c6369" height="829.0" layoutX="-26.0" layoutY="-22.0" stroke="#615d5d" strokeType="INSIDE" width="1697.0" />
-      <Rectangle id="1" arcHeight="5.0" arcWidth="5.0" fill="#0018ec" height="39.0" layoutX="591.0" layoutY="22.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="4" arcHeight="5.0" arcWidth="5.0" fill="#05eb25" height="39.0" layoutX="592.0" layoutY="606.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="7" arcHeight="5.0" arcWidth="5.0" fill="#b703c4" height="39.0" layoutX="637.0" layoutY="30.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="21" arcHeight="5.0" arcWidth="5.0" fill="#ff78f1" height="39.0" layoutX="637.0" layoutY="597.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="36" arcHeight="5.0" arcWidth="5.0" fill="#ff9306" height="39.0" layoutX="543.0" layoutY="30.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="22" arcHeight="5.0" arcWidth="5.0" fill="#fbff00" height="39.0" layoutX="543.0" layoutY="597.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="46" arcHeight="5.0" arcWidth="5.0" fill="#ff9306" height="39.0" layoutX="592.0" layoutY="554.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="45" arcHeight="5.0" arcWidth="5.0" fill="#fbff00" height="39.0" layoutX="592.0" layoutY="505.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="c" arcHeight="5.0" arcWidth="5.0" height="39.0" layoutX="592.0" layoutY="306.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="44" arcHeight="5.0" arcWidth="5.0" fill="#0018ec" height="39.0" layoutX="592.0" layoutY="455.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="43" arcHeight="5.0" arcWidth="5.0" fill="#ff78f1" height="39.0" layoutX="592.0" layoutY="406.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="42" arcHeight="5.0" arcWidth="5.0" fill="#b703c4" height="39.0" layoutX="592.0" layoutY="357.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="41" arcHeight="5.0" arcWidth="5.0" fill="#fbff00" height="39.0" layoutX="592.0" layoutY="259.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="40" arcHeight="5.0" arcWidth="5.0" fill="#ff9306" height="39.0" layoutX="592.0" layoutY="213.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="39" arcHeight="5.0" arcWidth="5.0" fill="#05eb25" height="39.0" layoutX="592.0" layoutY="164.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="38" arcHeight="5.0" arcWidth="5.0" fill="#b703c4" height="39.0" layoutX="592.0" layoutY="118.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="37" arcHeight="5.0" arcWidth="5.0" fill="#ff78f1" height="39.0" layoutX="592.0" layoutY="71.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="35" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="39.0" layoutX="498.0" layoutY="46.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="34" arcHeight="5.0" arcWidth="5.0" fill="#b703c4" height="39.0" layoutX="452.0" layoutY="63.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="8" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="39.0" layoutX="682.0" layoutY="46.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="9" arcHeight="5.0" arcWidth="5.0" fill="#ff78f1" height="39.0" layoutX="727.0" layoutY="63.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="14" arcHeight="5.0" arcWidth="5.0" fill="#0018ec" height="39.0" layoutX="880.0" layoutY="306.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="10" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="39.0" layoutX="772.0" layoutY="89.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="13" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="39.0" layoutX="871.0" layoutY="260.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="11" arcHeight="5.0" arcWidth="5.0" fill="#05eb25" height="39.0" layoutX="814.0" layoutY="127.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="2" arcHeight="5.0" arcWidth="5.0" fill="#fbff00" height="39.0" layoutX="841.0" layoutY="171.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="12" arcHeight="5.0" arcWidth="5.0" fill="#ff78f1" height="39.0" layoutX="861.0" layoutY="214.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="15" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="39.0" layoutX="871.0" layoutY="354.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="29" arcHeight="5.0" arcWidth="5.0" fill="#05eb25" height="39.0" layoutX="301.0" layoutY="306.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="33" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="39.0" layoutX="406.0" layoutY="83.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="20" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="39.0" layoutX="683.0" layoutY="586.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="16" arcHeight="5.0" arcWidth="5.0" fill="#b703c4" height="39.0" layoutX="860.0" layoutY="403.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="3" arcHeight="5.0" arcWidth="5.0" fill="#ff9306" height="39.0" layoutX="841.0" layoutY="451.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="19" arcHeight="5.0" arcWidth="5.0" fill="#fbff00" height="39.0" layoutX="727.0" layoutY="566.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="18" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="39.0" layoutX="774.0" layoutY="537.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="17" arcHeight="5.0" arcWidth="5.0" fill="#0018ec" height="39.0" layoutX="814.0" layoutY="497.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="32" arcHeight="5.0" arcWidth="5.0" fill="#05eb25" height="39.0" layoutX="369.0" layoutY="126.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="28" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="39.0" layoutX="306.0" layoutY="354.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="30" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="39.0" layoutX="306.0" layoutY="260.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="23" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="39.0" layoutX="498.0" layoutY="586.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="24" arcHeight="5.0" arcWidth="5.0" fill="#ff9306" height="39.0" layoutX="452.0" layoutY="566.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="31" arcHeight="5.0" arcWidth="5.0" fill="#fbff00" height="39.0" layoutX="317.0" layoutY="214.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="6" arcHeight="5.0" arcWidth="5.0" fill="#ff78f1" height="39.0" layoutX="337.0" layoutY="166.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="27" arcHeight="5.0" arcWidth="5.0" fill="#ff9306" height="39.0" layoutX="319.0" layoutY="403.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="25" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="39.0" layoutX="406.0" layoutY="541.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="26" arcHeight="5.0" arcWidth="5.0" fill="#0018ec" height="39.0" layoutX="369.0" layoutY="497.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="5" arcHeight="5.0" arcWidth="5.0" fill="#b703c4" height="39.0" layoutX="339.0" layoutY="451.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="51" arcHeight="5.0" arcWidth="5.0" fill="#ff9306" height="39.0" layoutX="637.0" layoutY="282.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="61" arcHeight="5.0" arcWidth="5.0" fill="#05eb25" height="39.0" layoutX="637.0" layoutY="335.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="47" arcHeight="5.0" arcWidth="5.0" fill="#0018ec" height="39.0" layoutX="803.0" layoutY="207.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="48" arcHeight="5.0" arcWidth="5.0" fill="#ff78f1" height="39.0" layoutX="763.0" layoutY="233.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="49" arcHeight="5.0" arcWidth="5.0" fill="#b703c4" height="39.0" layoutX="722.0" layoutY="251.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="50" arcHeight="5.0" arcWidth="5.0" fill="#05eb25" height="39.0" layoutX="679.0" layoutY="266.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="56" arcHeight="5.0" arcWidth="5.0" fill="#05eb25" height="39.0" layoutX="376.0" layoutY="414.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="52" arcHeight="5.0" arcWidth="5.0" fill="#ff78f1" height="39.0" layoutX="543.0" layoutY="334.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="53" arcHeight="5.0" arcWidth="5.0" fill="#0018ec" height="39.0" layoutX="500.0" layoutY="355.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="54" arcHeight="5.0" arcWidth="5.0" fill="#fbff00" height="39.0" layoutX="459.0" layoutY="375.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="55" arcHeight="5.0" arcWidth="5.0" fill="#ff9306" height="39.0" layoutX="418.0" layoutY="396.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="60" arcHeight="5.0" arcWidth="5.0" fill="#b703c4" height="39.0" layoutX="679.0" layoutY="353.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="59" arcHeight="5.0" arcWidth="5.0" fill="#ff78f1" height="39.0" layoutX="722.0" layoutY="376.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="58" arcHeight="5.0" arcWidth="5.0" fill="#0018ec" height="39.0" layoutX="763.0" layoutY="394.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="57" arcHeight="5.0" arcWidth="5.0" fill="#fbff00" height="39.0" layoutX="803.0" layoutY="413.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="66" arcHeight="5.0" arcWidth="5.0" fill="#b703c4" height="39.0" layoutX="375.0" layoutY="201.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="65" arcHeight="5.0" arcWidth="5.0" fill="#05eb25" height="39.0" layoutX="418.0" layoutY="219.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="64" arcHeight="5.0" arcWidth="5.0" fill="#ff9306" height="39.0" layoutX="461.0" layoutY="242.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="63" arcHeight="5.0" arcWidth="5.0" fill="#fbff00" height="39.0" layoutX="502.0" layoutY="260.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="62" arcHeight="5.0" arcWidth="5.0" fill="#0018ec" height="39.0" layoutX="543.0" layoutY="282.0" stroke="BLACK" strokeType="INSIDE" width="39.0" />
-      <Rectangle id="30" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="312.0" layoutX="11.0" layoutY="468.0" stroke="BLACK" strokeType="INSIDE" width="249.0" />
-      <Label layoutX="89.0" layoutY="473.0" prefHeight="75.0" prefWidth="105.0" text="LEYENDA">
-         <font>
-            <Font name="System Bold" size="23.0" />
-         </font></Label>
-      <Label layoutX="43.0" layoutY="543.0" prefHeight="24.0" prefWidth="106.0" text="- Geografía">
-         <font>
-            <Font name="System Bold" size="14.0" />
-         </font>
-      </Label>
-      <Label layoutX="44.0" layoutY="568.0" prefHeight="24.0" prefWidth="106.0" text="- Historia">
-         <font>
-            <Font name="System Bold" size="14.0" />
-         </font>
-      </Label>
-      <Label layoutX="45.0" layoutY="593.0" prefHeight="24.0" prefWidth="193.0" text="- Deportes y pasatiempos">
-         <font>
-            <Font name="System Bold" size="14.0" />
-         </font>
-      </Label>
-      <Label layoutX="44.0" layoutY="620.0" prefHeight="24.0" prefWidth="146.0" text="- Ciencias y naturaleza">
-         <font>
-            <Font name="System Bold" size="14.0" />
-         </font>
-      </Label>
-      <Label layoutX="44.0" layoutY="650.0" prefHeight="24.0" prefWidth="146.0" text="- Arte y Literatura">
-         <font>
-            <Font name="System Bold" size="14.0" />
-         </font>
-      </Label>
-      <Label layoutX="44.0" layoutY="681.0" prefHeight="24.0" prefWidth="146.0" text="- Entretenimiento">
-         <font>
-            <Font name="System Bold" size="14.0" />
-         </font>
-      </Label>
-      <Label layoutX="44.0" layoutY="709.0" prefHeight="24.0" prefWidth="146.0" text="- Centro">
-         <font>
-            <Font name="System Bold" size="14.0" />
-         </font>
-      </Label>
-      <Label layoutX="44.0" layoutY="733.0" prefHeight="24.0" prefWidth="146.0" text="- Casillas especiales">
-         <font>
-            <Font name="System Bold" size="14.0" />
-         </font>
-      </Label>
-      <Circle fill="#ff9306" layoutX="41.0" layoutY="606.0" radius="9.0" stroke="BLACK" strokeType="INSIDE" />
-      <Circle fill="#fbff00" layoutX="40.0" layoutY="581.0" radius="9.0" stroke="BLACK" strokeType="INSIDE" />
-      <Circle fill="#0018ec" layoutX="40.0" layoutY="556.0" radius="9.0" stroke="BLACK" strokeType="INSIDE" />
-      <Circle fill="#05eb25" layoutX="41.0" layoutY="632.0" radius="9.0" stroke="BLACK" strokeType="INSIDE" />
-      <Circle fill="#b703c4" layoutX="41.0" layoutY="663.0" radius="9.0" stroke="BLACK" strokeType="INSIDE" />
-      <Circle fill="#ff78f1" layoutX="40.0" layoutY="693.0" radius="9.0" stroke="BLACK" strokeType="INSIDE" />
-      <Circle layoutX="41.0" layoutY="721.0" radius="9.0" stroke="BLACK" strokeType="INSIDE" />
-      <Circle fill="WHITE" layoutX="41.0" layoutY="745.0" radius="9.0" stroke="BLACK" strokeType="INSIDE" />
-      <VBox alignment="TOP_RIGHT" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
-         <children>
-            <Button fx:id="diceButton" mnemonicParsing="false" onAction="#rollDice" prefHeight="60.0" prefWidth="60.0" text="Roll" style="-fx-font-size: 20px; -fx-background-color: #4CAF50; -fx-text-fill: white; -fx-background-radius: 10;">
-               <font>
-                  <Font name="System Bold" size="16.0" />
-               </font>
-            </Button>
-            <Label fx:id="diceResultLabel" alignment="CENTER" prefHeight="40.0" prefWidth="60.0" text="?" textFill="WHITE">
-               <font>
-                  <Font name="System Bold" size="24.0" />
-               </font>
-            </Label>
-         </children>
-      </VBox>
-   </children>
-</AnchorPane>
-*/

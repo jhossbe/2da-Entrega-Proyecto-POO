@@ -5,7 +5,13 @@
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="721.0" prefWidth="1442.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.triviaucab1.controller.JuegoController">
+
+<AnchorPane fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+            prefHeight="721.0" prefWidth="1442.0"
+            onMouseClicked="#onCasillaClick"
+            xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.triviaucab1.controller.JuegoController">
+
     <children>
         <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#5c6369" height="1110.0" layoutX="-26.0" layoutY="-22.0" stroke="#615d5d" strokeType="INSIDE" width="1697.0" />
         <Label fx:id="jugadorEnTurnoLabel" layoutX="1000.0" layoutY="50.0" text="Jugador Actual: " textFill="WHITE">
@@ -154,10 +160,10 @@
                 <Font name="System Bold" size="14.0" />
             </font>
         </Button>
-      <Button layoutX="17.0" layoutY="166.0" mnemonicParsing="false" onAction="#handleRegresar" prefHeight="40.0" prefWidth="200.0" text="Rendirse">
-         <font>
-            <Font name="System Bold" size="14.0" />
-         </font>
-      </Button>
+        <Button layoutX="17.0" layoutY="166.0" mnemonicParsing="false" onAction="#handleRegresar" prefHeight="40.0" prefWidth="200.0" text="Rendirse">
+            <font>
+                <Font name="System Bold" size="14.0" />
+            </font>
+        </Button>
     </children>
 </AnchorPane>
