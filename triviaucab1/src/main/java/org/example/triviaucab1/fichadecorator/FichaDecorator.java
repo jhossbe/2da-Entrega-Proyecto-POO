@@ -40,7 +40,4 @@ public abstract class FichaDecorator implements Ficha {
         FichaBase.dibujarBordes(gc, x, y, radius);
     }
 
-
-
-
 }

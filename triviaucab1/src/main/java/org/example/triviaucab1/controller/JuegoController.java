@@ -5,15 +5,17 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+import org.example.triviaucab1.module.Jugador;
 import org.example.triviaucab1.module.Partida;
 import org.example.triviaucab1.module.tablero.CasillaNode;
 import org.example.triviaucab1.module.tablero.GrafoTablero;
@@ -31,11 +33,10 @@ public class JuegoController {
     private GrafoTablero grafoTablero;
     private int ultimoValorDado = 0;
     private boolean puedeMover = false;
-    private Circle fichaJugador;
+    private List<Canvas> fichasCanvas = new ArrayList<>();
     private List<CasillaNode> movimientosPosibles = new ArrayList<>();
     private Map<String, CasillaNode> mapaIDaNodo = new HashMap<>();
     private Map<CasillaNode, Rectangle> mapaNodoARect = new HashMap<>();
-    private CasillaNode casillaActual;
     private Partida partida;
 
     @FXML
@@ -60,20 +61,6 @@ public class JuegoController {
 
         conectarCasillasCorrectamente();
 
-        // Inicializar posición del jugador en el centro
-        casillaActual = mapaIDaNodo.get("c");
-        if (casillaActual == null) {
-            System.err.println("❌ ERROR: No se encontró la casilla central 'c'");
-            return;
-        }
-
-        fichaJugador = new Circle(10, Color.DODGERBLUE);
-        fichaJugador.setStroke(Color.WHITE);
-        fichaJugador.setStrokeWidth(2);
-        fichaJugador.setLayoutX(casillaActual.getX());
-        fichaJugador.setLayoutY(casillaActual.getY());
-        rootPane.getChildren().add(fichaJugador);
-
         // Cargar el componente del dado
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/triviaucab1/DadoView.fxml"));
@@ -89,7 +76,6 @@ public class JuegoController {
 
         System.out.println("🧩 Nodos en el grafo: " + grafoTablero.getIdsNodos().size());
         System.out.println("🧩 Nodos visuales encontrados: " + mapaIDaNodo.size());
-        System.out.println("🎯 Posición inicial: " + casillaActual.getId());
 
         // Debug: verificar conexiones
         verificarConexiones();
@@ -98,9 +84,113 @@ public class JuegoController {
     public void setPartida(Partida partida) {
         this.partida = partida;
         System.out.println("Partida recibida con " + partida.getJugadores().size() + " jugadores.");
+
+        // Inicializar fichas de jugadores
+        inicializarFichasJugadores();
+
+        // Actualizar interfaz
+        actualizarInterfazJugador();
+    }
+
+    /**
+     * Inicializa las fichas visuales de todos los jugadores en el tablero.
+     */
+    private void inicializarFichasJugadores() {
+        if (partida == null) return;
+
+        // Limpiar fichas anteriores
+        for (Canvas canvas : fichasCanvas) {
+            rootPane.getChildren().remove(canvas);
+        }
+        fichasCanvas.clear();
+
+        // Crear fichas para cada jugador
+        for (int i = 0; i < partida.getJugadores().size(); i++) {
+            Jugador jugador = partida.getJugadores().get(i);
+            CasillaNode posicion = jugador.getPosicionActual();
+
+            if (posicion == null) {
+                // Si no tiene posición, colocar en el centro
+                posicion = mapaIDaNodo.get("c");
+                jugador.setPosicionActual(posicion);
+            }
+
+            // Crear canvas para la ficha
+            Canvas fichaCanvas = new Canvas(30, 30);
+
+            // Calcular posición con offset para múltiples jugadores
+            double offsetX = (i % 2) * 15 - 7.5; // Alternar izquierda/derecha
+            double offsetY = (i / 2) * 15 - 7.5; // Alternar arriba/abajo
+
+            fichaCanvas.setLayoutX(posicion.getX() + offsetX - 15);
+            fichaCanvas.setLayoutY(posicion.getY() + offsetY - 15);
+
+            // Dibujar la ficha usando el patrón Decorator
+            GraphicsContext gc = fichaCanvas.getGraphicsContext2D();
+            jugador.getFicha().dibujar(gc, 15, 15, 12); // Centro del canvas, radio 12
+
+            fichasCanvas.add(fichaCanvas);
+            rootPane.getChildren().add(fichaCanvas);
+        }
+    }
+
+    /**
+     * Actualiza la interfaz para mostrar información del jugador actual.
+     */
+    private void actualizarInterfazJugador() {
+        if (partida == null) return;
+
+        Jugador jugadorActual = partida.getJugadorActual();
+        if (jugadorActual != null) {
+            jugadorEnTurnoLabel.setText("Jugador Actual: " + jugadorActual.getAlias());
+
+            // Mostrar quesitos ganados
+            StringBuilder quesitos = new StringBuilder("Quesitos: ");
+            List<String> quesitosGanados = jugadorActual.getQuesitos();
+            for (String quesito : quesitosGanados) {
+                quesitos.append(quesito).append(" ✓ ");
+            }
+
+            // Actualizar algún label con los quesitos (si existe)
+            // quesitosLabel.setText(quesitos.toString());
+        }
+    }
+
+    /**
+     * Actualiza la posición visual de un jugador específico.
+     */
+    private void actualizarPosicionJugador(Jugador jugador) {
+        int indiceJugador = partida.getJugadores().indexOf(jugador);
+        if (indiceJugador >= 0 && indiceJugador < fichasCanvas.size()) {
+            Canvas fichaCanvas = fichasCanvas.get(indiceJugador);
+            CasillaNode nuevaPosicion = jugador.getPosicionActual();
+
+            // Calcular offset para múltiples jugadores
+            double offsetX = (indiceJugador % 2) * 15 - 7.5;
+            double offsetY = (indiceJugador / 2) * 15 - 7.5;
+
+            fichaCanvas.setLayoutX(nuevaPosicion.getX() + offsetX - 15);
+            fichaCanvas.setLayoutY(nuevaPosicion.getY() + offsetY - 15);
+
+            // Redibujar la ficha (puede haber cambiado con nuevos segmentos)
+            GraphicsContext gc = fichaCanvas.getGraphicsContext2D();
+            gc.clearRect(0, 0, 30, 30);
+            jugador.getFicha().dibujar(gc, 15, 15, 12);
+        }
     }
 
     public void lanzarYMostrarMovimientos(int valorDado) {
+        if (partida == null || partida.isPartidaTerminada()) {
+            System.out.println("🚫 No hay partida activa");
+            return;
+        }
+
+        Jugador jugadorActual = partida.getJugadorActual();
+        if (jugadorActual == null) {
+            System.out.println("🚫 No hay jugador activo");
+            return;
+        }
+
         this.ultimoValorDado = valorDado;
         this.puedeMover = true;
 
@@ -110,10 +200,12 @@ public class JuegoController {
             rect.setStrokeWidth(1);
         }
 
-        // Encontrar movimientos posibles
-        movimientosPosibles = grafoTablero.encontrarDestinosConPasos(casillaActual, valorDado);
+        // Encontrar movimientos posibles desde la posición actual del jugador
+        CasillaNode posicionActual = jugadorActual.getPosicionActual();
+        movimientosPosibles = grafoTablero.encontrarDestinosConPasos(posicionActual, valorDado);
 
-        System.out.println("🎯 Movimientos posibles desde " + casillaActual.getId() + " con dado " + valorDado + ":");
+        System.out.println("🎯 Movimientos posibles para " + jugadorActual.getAlias() +
+                " desde " + posicionActual.getId() + " con dado " + valorDado + ":");
 
         if (movimientosPosibles.isEmpty()) {
             System.out.println("   ❌ No hay movimientos posibles");
@@ -136,7 +228,7 @@ public class JuegoController {
 
     @FXML
     private void onCasillaClick(MouseEvent event) {
-        if (!puedeMover) {
+        if (!puedeMover || partida == null || partida.isPartidaTerminada()) {
             System.out.println("🚫 No se puede mover en este momento");
             return;
         }
@@ -147,10 +239,11 @@ public class JuegoController {
             CasillaNode nodoDestino = mapaIDaNodo.get(id);
 
             if (nodoDestino != null && movimientosPosibles.contains(nodoDestino)) {
+                Jugador jugadorActual = partida.getJugadorActual();
+
                 // Realizar movimiento
-                casillaActual = nodoDestino;
-                fichaJugador.setLayoutX(nodoDestino.getX());
-                fichaJugador.setLayoutY(nodoDestino.getY());
+                partida.moverJugador(jugadorActual, nodoDestino);
+                actualizarPosicionJugador(jugadorActual);
 
                 // Limpiar estado
                 movimientosPosibles.clear();
@@ -162,21 +255,67 @@ public class JuegoController {
                     r.setStrokeWidth(1);
                 }
 
-                System.out.println("✅ Movimiento realizado a: " + nodoDestino.getId());
+                System.out.println("✅ " + jugadorActual.getAlias() + " se movió a: " + nodoDestino.getId());
+
+                // Simular ganar quesito en casillas principales (para demostración)
+                simularGanarQuesito(jugadorActual, nodoDestino);
+
+                // Pasar turno automáticamente (en un juego real esto sería después de responder pregunta)
+                partida.pasarTurno();
+                actualizarInterfazJugador();
+
             } else {
                 System.out.println("❌ Movimiento inválido a: " + id);
             }
         }
     }
 
+    /**
+     * Simula ganar un quesito cuando se llega a ciertas casillas (para demostración).
+     */
+    private void simularGanarQuesito(Jugador jugador, CasillaNode casilla) {
+        // Mapeo de casillas principales a categorías (para demostración)
+        Map<String, String> casillasACategorias = Map.of(
+                "1", "Geografia",
+                "2", "Historia",
+                "3", "Deportes",
+                "4", "Ciencias",
+                "5", "Arte",
+                "6", "Entretenimiento"
+        );
+
+        String categoria = casillasACategorias.get(casilla.getId());
+        if (categoria != null && !jugador.tieneQuesito(categoria)) {
+            // Simular respuesta correcta (50% de probabilidad)
+            if (Math.random() > 0.5) {
+                partida.otorgarCategoria(jugador, categoria);
+                actualizarPosicionJugador(jugador); // Redibujar ficha con nuevo segmento
+
+                if (jugador.haGanadoTodosLosQuesitos()) {
+                    System.out.println("🎊 " + jugador.getAlias() + " ha ganado todos los quesitos! Debe llegar al centro para ganar.");
+                }
+            }
+        }
+    }
+
     @FXML
     private void handleFinalizarPartida(ActionEvent event) {
-        System.out.println("Botón 'Finalizar Partida' presionado.");
+        if (partida != null) {
+            partida.terminarPartida("Finalizada por el usuario");
+        }
+        System.out.println("Partida finalizada.");
     }
 
     @FXML
     private void handleRendicion(ActionEvent event) {
-        System.out.println("Botón 'Rendición' presionado.");
+        if (partida != null && !partida.isPartidaTerminada()) {
+            Jugador jugadorActual = partida.getJugadorActual();
+            if (jugadorActual != null) {
+                System.out.println("🏳️ " + jugadorActual.getAlias() + " se ha rendido.");
+                partida.pasarTurno();
+                actualizarInterfazJugador();
+            }
+        }
     }
 
     @FXML
@@ -343,6 +482,27 @@ public class JuegoController {
                 System.out.println("     Desde casilla " + casilla + " puede alcanzar centro en 6 pasos: " + (puedeAlcanzarCentro ? "✅" : "❌"));
             }
         }
+    }
+
+    /**
+     * Método de utilidad para crear una partida de prueba.
+     */
+    public void crearPartidaPrueba() {
+        partida = new Partida();
+
+        // Crear jugadores de prueba
+        CasillaNode centro = mapaIDaNodo.get("c");
+        Jugador jugador1 = new Jugador("Jugador 1", Color.RED, centro);
+        Jugador jugador2 = new Jugador("Jugador 2", Color.BLUE, centro);
+
+        partida.agregarJugador(jugador1);
+        partida.agregarJugador(jugador2);
+        partida.iniciarPartida();
+
+        // Configurar la partida en el controlador
+        setPartida(partida);
+
+        System.out.println("🎮 Partida de prueba creada con 2 jugadores");
     }
 }
 

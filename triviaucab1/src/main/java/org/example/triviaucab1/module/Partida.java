@@ -1,5 +1,7 @@
 package org.example.triviaucab1.module;
 
+import org.example.triviaucab1.module.tablero.CasillaNode;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
@@ -9,37 +11,64 @@ import java.time.Duration;
 
 public class Partida {
     private List<Jugador> jugadores;
-    private Tablero tablero; // Asumiendo que Tablero es serializable o no se guarda directamente
+    private Tablero tablero;
     private int jugadorEnTurnoIndex;
-    private Map<Jugador, Integer> posiciones; // <--- Esto puede dar problemas al serializar con Jackson
-    private LocalDateTime fechaInicio; // <--- Esto puede dar problemas al serializar con Jackson
+    private Map<Jugador, Integer> posiciones; // Posiciones en el tablero lineal
+    private LocalDateTime fechaInicio;
     private LocalDateTime fechaFin;
     private boolean partidaTerminada;
     private long tiempoTotalSegundos;
-    // private List<Pregunta> bancoDePreguntas; // Lo añadiremos cuando tengamos la clase Pregunta
+    private int numeroRonda;
 
     public Partida() {
         this.jugadores = new ArrayList<>();
-        this.tablero = new Tablero(); // Asegúrate de que Tablero tenga un constructor por defecto
+        this.tablero = new Tablero();
         this.posiciones = new HashMap<>();
-        // this.quesitosObtenidos = new HashMap<>(); // ELIMINADO
         this.jugadorEnTurnoIndex = 0;
-        this.fechaInicio = LocalDateTime.now(); // Se inicializa al crear la partida
+        this.fechaInicio = LocalDateTime.now();
         this.partidaTerminada = false;
         this.tiempoTotalSegundos = 0;
+        this.numeroRonda = 1;
     }
 
     public void iniciar(List<Jugador> jugadoresSeleccionados) {
         this.jugadores = jugadoresSeleccionados;
         for (Jugador jugador : jugadoresSeleccionados) {
             this.posiciones.put(jugador, 0);
-            // No necesitamos inicializar quesitos aquí, ya se inicializan en el constructor de Jugador
         }
         this.jugadorEnTurnoIndex = 0;
         this.partidaTerminada = false;
         this.fechaInicio = LocalDateTime.now();
         this.tiempoTotalSegundos = 0;
+
+        // Activar el primer jugador
+        if (!jugadores.isEmpty()) {
+            jugadores.get(0).setTurnoActivo(true);
+        }
+
         System.out.println("Partida iniciada con " + jugadores.size() + " jugadores.");
+    }
+
+    /**
+     * Inicia la partida estableciendo el primer jugador como activo.
+     */
+    public void iniciarPartida() {
+        if (!jugadores.isEmpty()) {
+            jugadores.get(0).setTurnoActivo(true);
+            System.out.println("🎮 Partida iniciada con " + jugadores.size() + " jugadores");
+            System.out.println("🎯 Turno de: " + getJugadorActual().getAlias());
+        }
+    }
+
+    /**
+     * Añade un jugador a la partida.
+     */
+    public void agregarJugador(Jugador jugador) {
+        if (!partidaTerminada) {
+            jugadores.add(jugador);
+            posiciones.put(jugador, 0);
+            System.out.println("➕ Jugador agregado: " + jugador.getAlias());
+        }
     }
 
     public Jugador getJugadorEnTurno() {
@@ -49,13 +78,42 @@ public class Partida {
         return jugadores.get(jugadorEnTurnoIndex);
     }
 
+    /**
+     * Obtiene el jugador que tiene el turno actual (alias para compatibilidad).
+     */
+    public Jugador getJugadorActual() {
+        return getJugadorEnTurno();
+    }
+
     public void siguienteTurno() {
         if (jugadores.isEmpty()) {
             System.out.println("No hay jugadores en la partida para avanzar el turno.");
             return;
         }
+
+        // Desactivar turno del jugador actual
+        jugadores.get(jugadorEnTurnoIndex).setTurnoActivo(false);
+
+        // Pasar al siguiente jugador
         this.jugadorEnTurnoIndex = (this.jugadorEnTurnoIndex + 1) % jugadores.size();
-        System.out.println("Es el turno de: " + getJugadorEnTurno().getAlias());
+
+        // Si volvemos al primer jugador, incrementar ronda
+        if (jugadorEnTurnoIndex == 0) {
+            numeroRonda++;
+            System.out.println("🔄 Ronda " + numeroRonda);
+        }
+
+        // Activar turno del nuevo jugador actual
+        jugadores.get(jugadorEnTurnoIndex).setTurnoActivo(true);
+
+        System.out.println("🎯 Turno de: " + getJugadorActual().getAlias());
+    }
+
+    /**
+     * Pasa el turno al siguiente jugador (alias para compatibilidad).
+     */
+    public void pasarTurno() {
+        siguienteTurno();
     }
 
     public void moverJugador(Jugador jugador, int pasos) {
@@ -64,32 +122,58 @@ public class Partida {
             return;
         }
         int currentPos = posiciones.getOrDefault(jugador, 0);
-        // Asegúrate de que tablero.getRutaPrincipalCasillaIds() no sea null/vacío
         int newPos = (currentPos + pasos) % tablero.getRutaPrincipalCasillaIds().length;
         posiciones.put(jugador, newPos);
         System.out.println(jugador.getAlias() + " se movió de la posición " + currentPos + " a la posición " + newPos);
     }
 
     /**
-     * Añade un quesito a un jugador (ahora usa el método del Jugador).
-     * @param jugador El jugador que gana el quesito.
-     * @param categoria La categoría del quesito ganado.
+     * Mueve un jugador a una nueva posición específica (para el sistema visual).
+     */
+    public void moverJugador(Jugador jugador, CasillaNode nuevaPosicion) {
+        jugador.moverA(nuevaPosicion);
+
+        // Verificar si el jugador ha ganado después del movimiento
+        verificarCondicionVictoria(jugador);
+    }
+
+    /**
+     * Añade un quesito a un jugador.
      */
     public void añadirQuesito(Jugador jugador, String categoria) {
         if (jugador != null) {
-            jugador.addQuesito(categoria); // <--- USA EL MÉTODO DEL JUGADOR
+            jugador.addQuesito(categoria);
             System.out.println(jugador.getAlias() + " ganó el quesito de " + categoria);
         }
     }
 
     /**
-     * Verifica si un jugador ha ganado la partida (ahora usa los quesitos del Jugador).
-     * @param jugador El jugador a verificar.
-     * @return true si el jugador ha ganado, false en caso contrario.
+     * Otorga una categoría a un jugador (alias para compatibilidad).
+     */
+    public void otorgarCategoria(Jugador jugador, String categoria) {
+        añadirQuesito(jugador, categoria);
+        verificarCondicionVictoria(jugador);
+    }
+
+    /**
+     * Verifica si un jugador ha ganado la partida.
      */
     public boolean verificarGanador(Jugador jugador) {
-        int quesitosNecesarios = 6;
-        return jugador != null && jugador.getQuesitos().size() >= quesitosNecesarios;
+        return jugador != null && jugador.haGanadoTodosLosQuesitos();
+    }
+
+    /**
+     * Verifica si un jugador ha cumplido las condiciones de victoria.
+     */
+    private void verificarCondicionVictoria(Jugador jugador) {
+        if (jugador.haGanadoTodosLosQuesitos() &&
+                jugador.getPosicionActual() != null &&
+                jugador.getPosicionActual().getId().equals("c")) {
+
+            partidaTerminada = true;
+            System.out.println("🏆 ¡" + jugador.getAlias() + " ha ganado la partida!");
+            terminarPartida();
+        }
     }
 
     public void terminarPartida() {
@@ -98,23 +182,118 @@ public class Partida {
         this.tiempoTotalSegundos = Duration.between(fechaInicio, fechaFin).getSeconds();
     }
 
-    // Getters y Setters (mantenerlos para la serialización básica, aunque algunos den problemas)
-    public List<Jugador> getJugadores() { return jugadores; }
-    public void setJugadores(List<Jugador> jugadores) { this.jugadores = jugadores; }
-    public Tablero getTablero() { return tablero; }
-    public void setTablero(Tablero tablero) { this.tablero = tablero; }
-    public int getJugadorEnTurnoIndex() { return jugadorEnTurnoIndex; }
-    public void setJugadorEnTurnoIndex(int jugadorEnTurnoIndex) { this.jugadorEnTurnoIndex = jugadorEnTurnoIndex; }
-    public Map<Jugador, Integer> getPosiciones() { return posiciones; }
-    public void setPosiciones(Map<Jugador, Integer> posiciones) { this.posiciones = posiciones; }
-    // public Map<Jugador, List<String>> getQuesitosObtenidos() { return quesitosObtenidos; } // ELIMINADO
-    // public void setQuesitosObtenidos(Map<Jugador, List<String>> quesitosObtenidos) { this.quesitosObtenidos = quesitosObtenidos; } // ELIMINADO
-    public LocalDateTime getFechaInicio() { return fechaInicio; }
-    public void setFechaInicio(LocalDateTime fechaInicio) { this.fechaInicio = fechaInicio; }
-    public LocalDateTime getFechaFin() { return fechaFin; }
-    public void setFechaFin(LocalDateTime fechaFin) { this.fechaFin = fechaFin; }
-    public boolean isPartidaTerminada() { return partidaTerminada; }
-    public void setPartidaTerminada(boolean partidaTerminada) { this.partidaTerminada = partidaTerminada; }
-    public long getTiempoTotalSegundos() { return tiempoTotalSegundos; }
-    public void setTiempoTotalSegundos(long tiempoTotalSegundos) { this.tiempoTotalSegundos = tiempoTotalSegundos; }
+    /**
+     * Termina la partida forzosamente con un motivo.
+     */
+    public void terminarPartida(String motivo) {
+        terminarPartida();
+        System.out.println("🛑 Partida terminada: " + motivo);
+    }
+
+    /**
+     * Obtiene estadísticas de la partida.
+     */
+    public String getEstadisticas() {
+        StringBuilder stats = new StringBuilder();
+        stats.append("📊 Estadísticas de la Partida:\n");
+        stats.append("Ronda: ").append(numeroRonda).append("\n");
+        stats.append("Jugadores: ").append(jugadores.size()).append("\n");
+
+        for (Jugador jugador : jugadores) {
+            stats.append("- ").append(jugador.getAlias())
+                    .append(": ").append(jugador.getNumeroQuesitosGanados())
+                    .append("/6 quesitos")
+                    .append(jugador.isTurnoActivo() ? " (TURNO ACTUAL)" : "")
+                    .append("\n");
+        }
+
+        return stats.toString();
+    }
+
+    // Getters y Setters existentes
+    public List<Jugador> getJugadores() {
+        return jugadores;
+    }
+
+    public void setJugadores(List<Jugador> jugadores) {
+        this.jugadores = jugadores;
+    }
+
+    public Tablero getTablero() {
+        return tablero;
+    }
+
+    public void setTablero(Tablero tablero) {
+        this.tablero = tablero;
+    }
+
+    public int getJugadorEnTurnoIndex() {
+        return jugadorEnTurnoIndex;
+    }
+
+    public void setJugadorEnTurnoIndex(int jugadorEnTurnoIndex) {
+        this.jugadorEnTurnoIndex = jugadorEnTurnoIndex;
+    }
+
+    public Map<Jugador, Integer> getPosiciones() {
+        return posiciones;
+    }
+
+    public void setPosiciones(Map<Jugador, Integer> posiciones) {
+        this.posiciones = posiciones;
+    }
+
+    public LocalDateTime getFechaInicio() {
+        return fechaInicio;
+    }
+
+    public void setFechaInicio(LocalDateTime fechaInicio) {
+        this.fechaInicio = fechaInicio;
+    }
+
+    public LocalDateTime getFechaFin() {
+        return fechaFin;
+    }
+
+    public void setFechaFin(LocalDateTime fechaFin) {
+        this.fechaFin = fechaFin;
+    }
+
+    public boolean isPartidaTerminada() {
+        return partidaTerminada;
+    }
+
+    public void setPartidaTerminada(boolean partidaTerminada) {
+        this.partidaTerminada = partidaTerminada;
+    }
+
+    public long getTiempoTotalSegundos() {
+        return tiempoTotalSegundos;
+    }
+
+    public void setTiempoTotalSegundos(long tiempoTotalSegundos) {
+        this.tiempoTotalSegundos = tiempoTotalSegundos;
+    }
+
+    public int getNumeroRonda() {
+        return numeroRonda;
+    }
+
+    public void setNumeroRonda(int numeroRonda) {
+        this.numeroRonda = numeroRonda;
+    }
+
+    /**
+     * Obtiene el ganador de la partida.
+     */
+    public Jugador getGanador() {
+        if (partidaTerminada) {
+            for (Jugador jugador : jugadores) {
+                if (verificarGanador(jugador)) {
+                    return jugador;
+                }
+            }
+        }
+        return null;
+    }
 }
