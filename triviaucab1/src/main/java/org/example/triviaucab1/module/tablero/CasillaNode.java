@@ -28,8 +28,9 @@ public class CasillaNode {
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (!(obj instanceof CasillaNode other)) return false;
-        return Objects.equals(this.id, other.id);
+        if (obj == null || getClass() != obj.getClass()) return false;
+        CasillaNode that = (CasillaNode) obj;
+        return Objects.equals(id, that.id);
     }
 
     @Override
@@ -37,3 +38,4 @@ public class CasillaNode {
         return Objects.hash(id);
     }
 }
+
