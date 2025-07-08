@@ -31,5 +31,38 @@
       "preguntasCorrectas": 0,
       "preguntasIncorrectas": 0
     }
+  },
+  {
+    "email": "jugador4@example.com",
+    "alias": "Jugador4",
+    "quesitos": [],
+    "estadisticas": {
+      "partidasJugadas": 0,
+      "partidasGanadas": 0,
+      "preguntasCorrectas": 0,
+      "preguntasIncorrectas": 0
+    }
+  },
+  {
+    "email": "jugador5@example.com",
+    "alias": "Jugador5",
+    "quesitos": [],
+    "estadisticas": {
+      "partidasJugadas": 0,
+      "partidasGanadas": 0,
+      "preguntasCorrectas": 0,
+      "preguntasIncorrectas": 0
+    }
+  },
+  {
+    "email": "jugador6@example.com",
+    "alias": "Jugador6",
+    "quesitos": [],
+    "estadisticas": {
+      "partidasJugadas": 0,
+      "partidasGanadas": 0,
+      "preguntasCorrectas": 0,
+      "preguntasIncorrectas": 0
+    }
   }
 ]

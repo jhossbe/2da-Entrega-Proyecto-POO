@@ -125,7 +125,7 @@ public class JuegoController {
         for (CasillaNode destino : movimientosPosibles) {
             Rectangle rect = mapaNodoARect.get(destino);
             if (rect != null) {
-                rect.setStroke(Color.LIMEGREEN);
+                rect.setStroke(Color.RED);
                 rect.setStrokeWidth(4);
                 System.out.println("   → " + destino.getId());
             } else {
@@ -187,6 +187,7 @@ public class JuegoController {
             Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
             stage.setScene(scene);
             stage.setTitle("TRIVIA UCAB - Menú Principal");
+            stage.setFullScreen(true);
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();

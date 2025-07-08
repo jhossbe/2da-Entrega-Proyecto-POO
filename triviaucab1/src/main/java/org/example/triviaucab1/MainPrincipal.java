@@ -14,7 +14,7 @@ public class MainPrincipal extends Application {
         Scene scene = new Scene(fxmlLoader.load());
         stage.setTitle("TRIVIA UCAB - Menú Principal");
         stage.setScene(scene);
-        stage.setMaximized(true);
+        stage.setFullScreen(true);
         stage.show();
     }
     public static void main(String[] args) {
