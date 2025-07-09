@@ -113,6 +113,14 @@ public class PartidaNuevaController implements Initializable {
      */
     @FXML
     private void handleAddPlayer() {
+        // **INICIO DE LA MODIFICACIÓN**
+        // Comprueba si ya se ha alcanzado el número máximo de jugadores.
+        if (jugadoresSeleccionados.size() >= 6) {
+            mostrarAlerta(Alert.AlertType.WARNING, "Límite de Jugadores", "No se pueden añadir más de 6 jugadores a la partida.");
+            return; // Detiene la ejecución del método para no añadir más jugadores.
+        }
+        // **FIN DE LA MODIFICACIÓN**
+
         Jugador selectedPlayer = jugadoresDisponiblesListView.getSelectionModel().getSelectedItem();
         if (selectedPlayer != null) {
             if (!jugadoresSeleccionados.contains(selectedPlayer)) {

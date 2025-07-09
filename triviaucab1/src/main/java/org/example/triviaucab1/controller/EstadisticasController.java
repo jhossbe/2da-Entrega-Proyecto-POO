@@ -72,18 +72,23 @@ public class EstadisticasController {
      */
     @FXML
     private void handleRegresar(ActionEvent event) {
-        System.out.println("Botón 'Regresar' presionado. Volviendo al menú principal.");
+        // ... (código para obtener el stage y cargar la escena es el mismo)
         try {
+            Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/org/example/triviaucab1/MenuPrincipalView.fxml"));
             Scene scene = new Scene(fxmlLoader.load());
-            Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
             stage.setScene(scene);
             stage.setTitle("TRIVIA UCAB - Menú Principal");
-            stage.setMaximized(true);
+
+            // Establece el modo de pantalla completa
+            stage.setFullScreen(true);
+
+            // Opcionalmente, puedes configurar qué tecla saca al usuario de pantalla completa
+            // stage.setFullScreenExitHint("Presiona ESC para salir de pantalla completa");
+
             stage.show();
         } catch (IOException e) {
-            System.err.println("Error al cargar la ventana del Menú Principal: " + e.getMessage());
-            e.printStackTrace();
+            // ...
         }
     }
 

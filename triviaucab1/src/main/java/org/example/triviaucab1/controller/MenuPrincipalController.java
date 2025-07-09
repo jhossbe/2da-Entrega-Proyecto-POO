@@ -72,7 +72,7 @@ public class MenuPrincipalController {
             Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
             stage.setScene(scene);
             stage.setTitle("TRIVIA UCAB - Estadísticas");
-            stage.setMaximized(true);
+            stage.setFullScreen(true);
             stage.show();
         } catch (IOException e) {
             System.err.println("Error al cargar la ventana de Estadísticas: " + e.getMessage());

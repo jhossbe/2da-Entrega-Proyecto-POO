@@ -7,6 +7,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -498,16 +499,22 @@ public class JuegoController {
     @FXML
     private void handleRegresar(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/triviaucab1/MenuPrincipalView.fxml"));
-            Scene scene = new Scene(loader.load());
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/org/example/triviaucab1/MenuPrincipalView.fxml"));
+            Scene scene = new Scene(fxmlLoader.load());
             stage.setScene(scene);
-            stage.setMaximized(true);
+            stage.setTitle("TRIVIA UCAB - Menú Principal");
+
+            // Establece el modo de pantalla completa
+            stage.setFullScreen(true);
+
+            // Opcionalmente, puedes configurar qué tecla saca al usuario de pantalla completa
+            // stage.setFullScreenExitHint("Presiona ESC para salir de pantalla completa");
+
             stage.show();
         } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+            // ...
+        }}
 
     @FXML
     private void handleSalir(ActionEvent event) {
