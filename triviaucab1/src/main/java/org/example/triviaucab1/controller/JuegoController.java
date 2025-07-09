@@ -18,6 +18,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.application.Platform;
+import org.example.triviaucab1.module.GestorEstadisticas;
 import org.example.triviaucab1.fichadecorator.Ficha;
 import org.example.triviaucab1.module.GestorPreguntas;
 import org.example.triviaucab1.module.Jugador;
@@ -42,7 +43,7 @@ public class JuegoController {
     @FXML private Label tiempoRespuestaLabel; // No usado en este ejemplo, pero se mantiene
 
     @FXML private Canvas fichaJugadorCanvas;
-
+    private GestorEstadisticas gestorEstadisticas;
     private GrafoTablero grafoTablero;
     private int ultimoValorDado = 0;
     private boolean puedeMover = false;
@@ -63,7 +64,7 @@ public class JuegoController {
         gestorPreguntas = new GestorPreguntas("preguntasJuegoTrivia_final.json");
         totalCategoriasParaGanar = gestorPreguntas.getTotalCategorias();
         System.out.println("Total de categorías de quesitos posibles para ganar: " + totalCategoriasParaGanar);
-
+        gestorEstadisticas = new GestorEstadisticas();
         grafoTablero = new GrafoTablero();
 
         // Estas son las definiciones de tus casillas y categorías
@@ -139,6 +140,9 @@ public class JuegoController {
         }
     }
 
+    public void setGestorEstadisticas(GestorEstadisticas gestorEstadisticas) {
+        this.gestorEstadisticas = gestorEstadisticas;
+    }
 
     /**
      * Establece la partida actual y configura el jugador inicial.
@@ -390,8 +394,6 @@ public class JuegoController {
                 actualizarUIJugadorActual();
             }
         } else if ("central".equals(tipoCasilla)) {
-            // Un jugador solo puede llegar a la casilla 'c' si tiene todos los quesitos (filtrado en lanzarYMostrarMovimientos).
-            // Por lo tanto, al caer aquí, significa que gana.
             System.out.println("Jugador en la casilla central.");
             System.out.println("¡VICTORIA! " + jugador.getAlias() + " ha ganado el juego!");
             Platform.runLater(() -> {
@@ -400,16 +402,17 @@ public class JuegoController {
                 alert.setHeaderText("¡Felicidades, " + jugador.getAlias() + "!");
                 alert.setContentText("¡Has llegado a la casilla central con todos los quesitos y has ganado el juego!");
                 alert.showAndWait();
-                // Deshabilitar el botón de dado para indicar que el juego ha terminado
+                jugador.getEstadisticas().incrementarPartidasJugadas();
+                jugador.getEstadisticas().incrementarPartidasGanadas();
+                gestorEstadisticas.actualizarEstadisticasJugador(jugador);
                 if (dadoController != null) {
                     dadoController.deshabilitarBotonLanzar();
                 }
                 Stage currentStage = (Stage) rootPane.getScene().getWindow();
                 navigateToMenuPrincipal(currentStage);
             });
-        } else { // Este es el caso para casillas "normal" (ahora tratadas como especiales)
+        } else {
             System.out.println("Jugador en casilla especial. ¡Repites el turno!");
-            // No se llama a partida.siguienteTurno() aquí. El turno se mantiene.
             Platform.runLater(() -> {
                 Alert alert = new Alert(AlertType.INFORMATION);
                 alert.setTitle("¡Casilla Especial!");
@@ -422,7 +425,7 @@ public class JuegoController {
     }
 
 
-    public void notificarResultadoPregunta(boolean respuestaCorrecta, String categoriaPregunta) {
+    public void notificarResultadoPregunta(boolean respuestaCorrecta, String categoriaPregunta,long tiempoRespuesta) {
         Jugador jugadorEnTurnoAntes = partida.getJugadorActual();
         System.out.println("DEBUG: Notificación de resultado. Jugador actual ANTES de la lógica del turno: " + (jugadorEnTurnoAntes != null ? jugadorEnTurnoAntes.getAlias() : "NULO"));
 
@@ -435,16 +438,19 @@ public class JuegoController {
         if (respuestaCorrecta) {
             System.out.println("¡Respuesta Correcta! " + jugadorEnTurnoAntes.getAlias() + " ha ganado un quesito de " + categoriaPregunta);
             jugadorEnTurnoAntes.addQuesito(categoriaPregunta);
-            dibujarFichaDelJugador(jugadorEnTurnoAntes); // Actualiza la ficha de quesitos visualmente
-            // NO se llama a partida.siguienteTurno() aquí. El turno se mantiene para el mismo jugador.
+            dibujarFichaDelJugador(jugadorEnTurnoAntes);
+            jugadorEnTurnoAntes.getEstadisticas().incrementarPreguntasCorrectasTotal();
+            jugadorEnTurnoAntes.getEstadisticas().incrementarPreguntasCorrectasPorCategoria(categoriaPregunta);
+            jugadorEnTurnoAntes.getEstadisticas().añadirTiempoRespuestaCorrecta(tiempoRespuesta);
+            gestorEstadisticas.actualizarEstadisticasJugador(jugadorEnTurnoAntes); //
             System.out.println("DEBUG: Respuesta CORRECTA. NO se pasa el turno.");
         } else {
             System.out.println("Respuesta Incorrecta. " + jugadorEnTurnoAntes.getAlias() + " no gana quesito. El turno pasa.");
-            partida.siguienteTurno(); // <-- ¡SOLO AQUÍ SE PASA EL TURNO!
+            jugadorEnTurnoAntes.getEstadisticas().incrementarPreguntasIncorrectas();
+            gestorEstadisticas.actualizarEstadisticasJugador(jugadorEnTurnoAntes);
+            partida.siguienteTurno();
             System.out.println("DEBUG: Respuesta INCORRECTA. Se pasa el turno.");
         }
-
-        // Siempre se actualiza la UI para reflejar el estado del juego (ya sea el mismo jugador o el siguiente)
         Jugador jugadorEnTurnoDespues = partida.getJugadorActual();
         System.out.println("DEBUG: Jugador actual DESPUÉS de la lógica del turno (antes de actualizar UI): " + (jugadorEnTurnoDespues != null ? jugadorEnTurnoDespues.getAlias() : "NULO"));
 
@@ -457,6 +463,16 @@ public class JuegoController {
     @FXML
     private void handleFinalizarPartida(ActionEvent event) {
         System.out.println("Partida finalizada.");
+        for (Jugador j : partida.getJugadores()) {
+            if (!j.tieneTodosLosQuesitos(totalCategoriasParaGanar)) {
+                j.getEstadisticas().incrementarPartidasJugadas();
+                j.getEstadisticas().incrementarPartidasPerdidas();
+                gestorEstadisticas.actualizarEstadisticasJugador(j);
+            } else {
+                j.getEstadisticas().incrementarPartidasJugadas();
+                gestorEstadisticas.actualizarEstadisticasJugador(j);
+            }
+        }
         partida.terminarPartida();
         handleRegresar(event);
     }
@@ -466,8 +482,12 @@ public class JuegoController {
         Jugador jugadorRendido = partida.getJugadorActual();
         if (jugadorRendido != null) {
             System.out.println(jugadorRendido.getAlias() + " se ha rendido.");
+            jugadorRendido.getEstadisticas().incrementarPartidasJugadas();
+            jugadorRendido.getEstadisticas().incrementarPartidasPerdidas();
+            gestorEstadisticas.actualizarEstadisticasJugador(jugadorRendido);
             if (partida.getJugadores().size() <= 1) {
-                handleFinalizarPartida(event);
+                partida.terminarPartida();
+                handleRegresar(event);
             } else {
                 partida.siguienteTurno();
                 actualizarUIJugadorActual();

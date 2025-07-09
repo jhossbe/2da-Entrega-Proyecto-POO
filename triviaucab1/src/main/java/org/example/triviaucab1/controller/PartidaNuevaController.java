@@ -17,12 +17,14 @@ import javafx.stage.Stage;
 import org.example.triviaucab1.module.Jugador;
 import org.example.triviaucab1.module.JsonService;
 import org.example.triviaucab1.module.Partida;
+import org.example.triviaucab1.module.GestorEstadisticas; // Importa el gestor
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Optional; // Asegúrate de que solo haya un Optional importado
 import java.util.ResourceBundle;
+
 
 /**
  * Controlador para la ventana de selección de jugadores para una nueva partida.
@@ -35,9 +37,10 @@ public class PartidaNuevaController implements Initializable {
     @FXML
     private ListView<Jugador> jugadoresSeleccionadosListView;
 
-    private ObservableList<Jugador> jugadoresDisponibles;
+    private ObservableList<Jugador> jugadoresDisponiblesObservable; // Renombrado para evitar conflicto con el método
     private ObservableList<Jugador> jugadoresSeleccionados;
     private JsonService jsonService;
+    private GestorEstadisticas gestorEstadisticas; // Instancia del gestor de estadísticas
 
     /**
      * Método de inicialización llamado automáticamente por FXMLLoader después de que se carga el FXML.
@@ -46,9 +49,12 @@ public class PartidaNuevaController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         jsonService = new JsonService();
-        jugadoresDisponibles = FXCollections.observableArrayList();
+        gestorEstadisticas = new GestorEstadisticas(); // Inicializa el gestor de estadísticas
+
+        jugadoresDisponiblesObservable = FXCollections.observableArrayList();
         jugadoresSeleccionados = FXCollections.observableArrayList();
 
+        // Configuración del CellFactory para mostrar solo el alias
         jugadoresDisponiblesListView.setCellFactory(lv -> new ListCell<Jugador>() {
             @Override
             protected void updateItem(Jugador jugador, boolean empty) {
@@ -64,9 +70,47 @@ public class PartidaNuevaController implements Initializable {
             }
         });
 
-        cargarJugadoresDesdeJson();
+        cargarJugadoresYFusionarEstadisticas(); // Nuevo método para cargar y fusionar
     }
 
+    /**
+     * Carga los jugadores desde el archivo JSON y los fusiona con sus estadísticas globales.
+     */
+    private void cargarJugadoresYFusionarEstadisticas() {
+        // 1. Carga los jugadores básicos (solo email y alias) del jugadores.json
+        List<Jugador> jugadoresBase = jsonService.cargarJugadores();
+
+        // 2. Carga todas las estadísticas acumuladas de todos los jugadores desde estadisticasJugadores.json
+        List<Jugador> jugadoresConEstadisticasGlobales = gestorEstadisticas.getRankingJugadores();
+
+        // 3. Fusiona las estadísticas globales en los jugadores base
+        for (Jugador jugadorBase : jugadoresBase) {
+            Optional<Jugador> jugadorGlobalConStats = jugadoresConEstadisticasGlobales.stream()
+                    .filter(j -> j.getEmail().equals(jugadorBase.getEmail()))
+                    .findFirst();
+
+            if (jugadorGlobalConStats.isPresent()) {
+                // Si encontramos estadísticas globales, las asignamos al jugador para la partida.
+                jugadorBase.setEstadisticas(jugadorGlobalConStats.get().getEstadisticas());
+                jugadorBase.setQuesitosGanadosNombres(jugadorGlobalConStats.get().getQuesitosGanadosNombres()); // También quesitos
+                System.out.println("DEBUG: Estadísticas y quesitos globales cargados para: " + jugadorBase.getAlias() +
+                        " - Preguntas Correctas: " + jugadorBase.getEstadisticas().getPreguntasCorrectasTotal() +
+                        ", Quesitos: " + jugadorBase.getQuesitosGanadosNombres());
+            } else {
+                // Si el jugador no existe en estadisticasJugadores.json (es un jugador nuevo),
+                // sus estadísticas y quesitos permanecerán en cero/vacío, como se inicializaron en el constructor de Jugador.
+                System.out.println("DEBUG: No se encontraron estadísticas globales para: " + jugadorBase.getAlias() + ". Se usarán estadísticas por defecto (cero/vacío).");
+            }
+        }
+
+        // Añade los jugadores fusionados a la lista de disponibles
+        jugadoresDisponiblesObservable.addAll(jugadoresBase);
+        jugadoresDisponiblesListView.setItems(jugadoresDisponiblesObservable);
+    }
+
+    /**
+     * Añade el jugador seleccionado de la lista de disponibles a la lista de seleccionados.
+     */
     @FXML
     private void handleAddPlayer() {
         Jugador selectedPlayer = jugadoresDisponiblesListView.getSelectionModel().getSelectedItem();
@@ -74,7 +118,7 @@ public class PartidaNuevaController implements Initializable {
             if (!jugadoresSeleccionados.contains(selectedPlayer)) {
                 jugadoresSeleccionados.add(selectedPlayer);
                 jugadoresSeleccionadosListView.setItems(jugadoresSeleccionados);
-                jugadoresDisponibles.remove(selectedPlayer);
+                jugadoresDisponiblesObservable.remove(selectedPlayer);
             } else {
                 mostrarAlerta(Alert.AlertType.WARNING, "Jugador Duplicado", "Este jugador ya ha sido añadido a la lista de seleccionados.");
             }
@@ -84,16 +128,27 @@ public class PartidaNuevaController implements Initializable {
     }
 
     /**
-     * Carga los jugadores desde el archivo JSON y los añade a la lista de disponibles.
+     * Remueve el jugador seleccionado de la lista de seleccionados y lo devuelve a la de disponibles.
      */
-    private void cargarJugadoresDesdeJson() {
-        List<Jugador> loadedPlayers = jsonService.cargarJugadores();
-        jugadoresDisponibles.addAll(loadedPlayers);
-        jugadoresDisponiblesListView.setItems(jugadoresDisponibles);
+    @FXML
+    private void handleRemovePlayer() {
+        Jugador selectedPlayer = jugadoresSeleccionadosListView.getSelectionModel().getSelectedItem();
+        if (selectedPlayer != null) {
+            jugadoresSeleccionados.remove(selectedPlayer);
+            // Add back to available list if not already there
+            if (!jugadoresDisponiblesObservable.contains(selectedPlayer)) {
+                jugadoresDisponiblesObservable.add(selectedPlayer);
+                // Sort the available list by alias to keep it tidy
+                FXCollections.sort(jugadoresDisponiblesObservable, (j1, j2) -> j1.getAlias().compareToIgnoreCase(j2.getAlias()));
+            }
+        } else {
+            mostrarAlerta(Alert.AlertType.WARNING, "Selección Vacía", "Por favor, selecciona un jugador de la lista de seleccionados para quitar.");
+        }
     }
 
     /**
-     * Añade el jugador seleccionado de la lista de disponibles a la lista de seleccionados.
+     * Maneja la acción cuando el botón "Jugar" es presionado.
+     * Inicia una nueva partida con los jugadores seleccionados.
      */
     @FXML
     private void handleJugar(ActionEvent event) {
@@ -102,8 +157,9 @@ public class PartidaNuevaController implements Initializable {
             return;
         }
 
+        // Crear una nueva partida y pasar los jugadores seleccionados (¡que ya tienen sus estadísticas fusionadas!)
         Partida nuevaPartida = new Partida();
-        nuevaPartida.iniciar(new ArrayList<>(jugadoresSeleccionados));
+        nuevaPartida.iniciar(new ArrayList<>(jugadoresSeleccionados)); // Pasa la lista de jugadores
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/triviaucab1/JuegoView.fxml"));
@@ -112,6 +168,7 @@ public class PartidaNuevaController implements Initializable {
             JuegoController juegoController = loader.getController();
             if (juegoController != null) {
                 juegoController.setPartida(nuevaPartida);
+                juegoController.setGestorEstadisticas(gestorEstadisticas);
             }
 
             Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
@@ -126,22 +183,6 @@ public class PartidaNuevaController implements Initializable {
         }
     }
 
-    /**
-     * Remueve el jugador seleccionado de la lista de seleccionados.
-     */
-    @FXML
-    private void handleRemovePlayer() {
-        Jugador selectedPlayer = jugadoresSeleccionadosListView.getSelectionModel().getSelectedItem();
-        if (selectedPlayer != null) {
-            jugadoresSeleccionados.remove(selectedPlayer);
-            jugadoresSeleccionadosListView.setItems(jugadoresSeleccionados);
-            if (!jugadoresDisponibles.contains(selectedPlayer)) {
-                jugadoresDisponibles.add(selectedPlayer);
-            }
-        } else {
-            mostrarAlerta(Alert.AlertType.WARNING, "Selección Vacía", "Por favor, selecciona un jugador de la lista de seleccionados para quitar.");
-        }
-    }
 
     /**
      * Maneja la acción cuando el botón "Regresar" es presionado.
@@ -151,10 +192,10 @@ public class PartidaNuevaController implements Initializable {
      */
     @FXML
     private void handleRegresar(ActionEvent event) {
-       Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-       alert.setTitle("Confirmar Regreso");
-       alert.setHeaderText("¿Estás seguro que deseas regresar al menú principal?");
-       alert.setContentText("Se perderá la selección actual de jugadores.");
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirmar Regreso");
+        alert.setHeaderText("¿Estás seguro que deseas regresar al menú principal?");
+        alert.setContentText("Se perderá la selección actual de jugadores.");
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {

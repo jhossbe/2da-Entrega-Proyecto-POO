@@ -2,6 +2,7 @@ package org.example.triviaucab1.module;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,53 +10,71 @@ import java.util.List;
 import java.util.Arrays;
 import java.util.ArrayList;
 
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+
 public class JsonService {
 
-    private static final String JUGADORES_FILE = "jugadores.json";
-    private static final String PARTIDA_FILE = "partida.json";
+    // Define la ruta del archivo de jugadores para lectura de recursos (dentro del JAR)
+    private static final String JUGADORES_RESOURCE_PATH = "/jugadores.json";
+    private static final String JUGADORES_FILE_NAME = "jugadores.json"; // Para guardar
+    private static final String PARTIDA_FILE_NAME = "partida.json"; // Para guardar/cargar partida
+
     private ObjectMapper objectMapper;
 
     public JsonService() {
         objectMapper = new ObjectMapper();
-        objectMapper.enable(SerializationFeature.INDENT_OUTPUT); // Para que el JSON se vea bonito
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
     }
 
     /**
-     * Lee la lista de jugadores desde el archivo JSON.
+     * Lee la lista de jugadores desde el archivo JSON de recursos.
+     * Asume que jugadores.json está en src/main/resources/ y solo contiene email y alias.
+     * Los campos como EstadisticasJugador se inicializarán por el constructor de Jugador.
      * @return Una lista de objetos Jugador.
      */
     public List<Jugador> cargarJugadores() {
-        try {
-            File file = new File(JUGADORES_FILE);
-            if (!file.exists()) {
-                System.out.println("Archivo de jugadores no encontrado, creando uno vacío.");
-                // Si el archivo no existe, crea uno vacío o con un ejemplo
-                guardarJugadores(new ArrayList<>());
+        List<Jugador> jugadores = new ArrayList<>();
+        try (InputStream is = getClass().getResourceAsStream(JUGADORES_RESOURCE_PATH)) {
+            if (is == null) {
+                System.err.println("Error: Archivo de jugadores '" + JUGADORES_RESOURCE_PATH + "' no encontrado en los recursos. Retornando lista vacía.");
+                // Si el recurso no se encuentra (ej. en un entorno de desarrollo donde no está copiado),
+                // podrías considerar una ruta alternativa para desarrollo o simplemente retornar vacío.
                 return new ArrayList<>();
             }
-            // Lee el array de JSON y lo convierte a una lista de Jugador
-            Jugador[] jugadoresArray = objectMapper.readValue(file, Jugador[].class);
-            return new ArrayList<>(Arrays.asList(jugadoresArray));
+
+            // Usar TypeReference es la forma robusta de deserializar listas de objetos complejos con Jackson
+            jugadores = objectMapper.readValue(is, new TypeReference<List<Jugador>>() {});
+            System.out.println("Jugadores cargados exitosamente desde " + JUGADORES_RESOURCE_PATH);
         } catch (IOException e) {
             System.err.println("Error al cargar jugadores desde JSON: " + e.getMessage());
             e.printStackTrace();
-            return new ArrayList<>();
         }
+        return jugadores;
     }
 
     /**
      * Guarda la lista de jugadores en el archivo JSON.
+     * Este método guardará el archivo en el directorio donde se ejecute el JAR o en la raíz del proyecto.
+     * Ten en cuenta que si el `jugadores.json` de recursos es estático, este método solo
+     * se usaría si los jugadores pueden ser creados/modificados y guardados por el usuario.
      * @param jugadores La lista de jugadores a guardar.
      */
     public void guardarJugadores(List<Jugador> jugadores) {
-        try {
-            objectMapper.writeValue(new File(JUGADORES_FILE), jugadores);
-            System.out.println("Jugadores guardados en " + JUGADORES_FILE);
+        try (OutputStream os = Files.newOutputStream(Paths.get(JUGADORES_FILE_NAME))) {
+            objectMapper.writeValue(os, jugadores);
+            System.out.println("Jugadores guardados en " + JUGADORES_FILE_NAME);
         } catch (IOException e) {
             System.err.println("Error al guardar jugadores en JSON: " + e.getMessage());
             e.printStackTrace();
         }
     }
+
+    // Los métodos cargarPartida() y guardarPartida() pueden permanecer como están
+    // ya que probablemente Partida.json se guarda y carga en el directorio de trabajo.
 
     /**
      * Carga el estado de la última partida guardada.
@@ -63,10 +82,10 @@ public class JsonService {
      */
     public Partida cargarPartida() {
         try {
-            File file = new File(PARTIDA_FILE);
+            File file = new File(PARTIDA_FILE_NAME);
             if (!file.exists()) {
                 System.out.println("Archivo de partida no encontrado, retornando nueva partida.");
-                return new Partida(); // Retorna una partida nueva si no hay archivo
+                return new Partida();
             }
             return objectMapper.readValue(file, Partida.class);
         } catch (IOException e) {
@@ -82,8 +101,8 @@ public class JsonService {
      */
     public void guardarPartida(Partida partida) {
         try {
-            objectMapper.writeValue(new File(PARTIDA_FILE), partida);
-            System.out.println("Partida guardada en " + PARTIDA_FILE);
+            objectMapper.writeValue(new File(PARTIDA_FILE_NAME), partida);
+            System.out.println("Partida guardada en " + PARTIDA_FILE_NAME);
         } catch (IOException e) {
             System.err.println("Error al guardar partida en JSON: " + e.getMessage());
             e.printStackTrace();

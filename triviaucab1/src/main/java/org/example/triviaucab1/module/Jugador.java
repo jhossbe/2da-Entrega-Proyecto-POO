@@ -1,9 +1,10 @@
 package org.example.triviaucab1.module;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import org.example.triviaucab1.fichadecorator.Ficha;
 import org.example.triviaucab1.fichadecorator.FichaBase;
-// Importa todos tus decoradores de Punto...
 import org.example.triviaucab1.fichadecorator.PuntoArteYLiteratura;
 import org.example.triviaucab1.fichadecorator.PuntoCienciasYNaturaleza;
 import org.example.triviaucab1.fichadecorator.PuntoDeportesYPasatiempos;
@@ -24,17 +25,17 @@ import java.util.Objects;
 public class Jugador {
     private String email;
     private String alias;
-    private Set<String> quesitosGanados; // Campo interno para los nombres de los quesitos
+    private Set<String> quesitosGanados;
     private EstadisticasJugador estadisticas;
     private String casillaActualId;
-    private Ficha fichaVisual; // Campo para la ficha visual del jugador
-
+    @JsonIgnore
+    private Ficha fichaVisual;
 
     public Jugador() {
         this.quesitosGanados = new HashSet<>();
-        this.estadisticas = new EstadisticasJugador(); // Asumiendo que EstadisticasJugador tiene un constructor por defecto
+        this.estadisticas = new EstadisticasJugador();
         this.casillaActualId = "c";
-        this.fichaVisual = new FichaBase(Color.WHITE); // Deja este color para la prueba
+        this.fichaVisual = new FichaBase(Color.WHITE);
     }
 
     public Jugador(String email, String alias) {
@@ -42,25 +43,6 @@ public class Jugador {
         this.email = email;
         this.alias = alias;
     }
-
-    // Constructor que podría ser usado al cargar jugadores de JSON
-    // Asegúrate de que este constructor es el que Jackson está utilizando si cargas Jugadores directamente.
-    // Si Jackson usa el constructor por defecto y luego setters, entonces el setQuesitosGanadosNombres es clave.
-    public Jugador(
-            @JsonProperty("email") String email,
-            @JsonProperty("alias") String alias,
-            @JsonProperty("quesitosGanadosNombres") List<String> quesitosIniciales,
-            @JsonProperty("estadisticas") EstadisticasJugador estadisticas,
-            @JsonProperty("casillaActualId") String casillaActualId) {
-        this(); // Llama al constructor por defecto para inicializar campos
-        this.email = email;
-        this.alias = alias;
-        this.estadisticas = estadisticas;
-        this.casillaActualId = casillaActualId;
-        // Llama al setter para asegurar que se reconstruya la ficha visual al cargar
-        setQuesitosGanadosNombres(quesitosIniciales);
-    }
-
 
     public String getEmail() { return email; }
     public String getAlias() { return alias; }

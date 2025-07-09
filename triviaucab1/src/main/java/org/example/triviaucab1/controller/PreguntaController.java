@@ -22,6 +22,9 @@ public class PreguntaController {
     private boolean respuestaCorrectaUsuario = false;
     private JuegoController juegoController;
 
+    private long tiempoInicioRespuesta; // <--- NUEVO CAMPO: Para registrar el tiempo de inicio
+    private long tiempoTranscurrido;     // <--- NUEVO CAMPO: Para guardar el tiempo final de la respuesta
+
     public void setJuegoController(JuegoController juegoController) {
         this.juegoController = juegoController;
     }
@@ -37,13 +40,27 @@ public class PreguntaController {
 
         resultadoLabel.setVisible(false);
         continuarButton.setVisible(false);
+
+        // --- INICIO DE CAMBIO ---
+        // Registrar el tiempo de inicio cuando la pregunta se muestra
+        this.tiempoInicioRespuesta = System.currentTimeMillis();
+        System.out.println("⏱️ Temporizador de pregunta iniciado.");
+        // --- FIN DE CAMBIO ---
     }
 
     /**
      * Inicializa el controlador, se llama automáticamente al cargar el FXML.
+     * (Este comentario parece un remanente, el método initialize no está aquí, handleEnviarRespuesta se llama en acción del botón)
      */
     @FXML
     private void handleEnviarRespuesta(ActionEvent event) {
+        // --- INICIO DE CAMBIO ---
+        // Calcular el tiempo transcurrido cuando el usuario envía la respuesta
+        long tiempoFinRespuesta = System.currentTimeMillis();
+        this.tiempoTranscurrido = tiempoFinRespuesta - this.tiempoInicioRespuesta;
+        System.out.println("⏱️ Tiempo de respuesta: " + tiempoTranscurrido + " ms");
+        // --- FIN DE CAMBIO ---
+
         String respuestaUsuario = respuestaTextField.getText();
         boolean esCorrecta = preguntaActual.esRespuestaCorrecta(respuestaUsuario);
         respuestaCorrectaUsuario = esCorrecta;
@@ -61,7 +78,7 @@ public class PreguntaController {
     @FXML
     private void handleContinuar() {
         if (juegoController != null) {
-            juegoController.notificarResultadoPregunta(respuestaCorrectaUsuario, preguntaActual.getCategoria());
+            juegoController.notificarResultadoPregunta(respuestaCorrectaUsuario, preguntaActual.getCategoria(), tiempoTranscurrido);
         }
         Stage stage = (Stage) continuarButton.getScene().getWindow();
         stage.close();
