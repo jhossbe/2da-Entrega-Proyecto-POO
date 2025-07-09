@@ -82,7 +82,7 @@ public class Jugador {
 
     // Setter para Jackson al cargar del JSON. Dispara la reconstrucción de la ficha.
     public void setQuesitosGanadosNombres(List<String> quesitosGanadosNombres) {
-        System.out.println("DEBUG (Jugador): setQuesitosGanadosNombres llamado con: " + quesitosGanadosNombres);
+        //System.out.println("DEBUG (Jugador): setQuesitosGanadosNombres llamado con: " + quesitosGanadosNombres);
         if (this.quesitosGanados == null) {
             this.quesitosGanados = new HashSet<>();
         }
@@ -90,8 +90,8 @@ public class Jugador {
         if (quesitosGanadosNombres != null) {
             this.quesitosGanados.addAll(quesitosGanadosNombres);
         }
-        System.out.println("DEBUG (Jugador): Quesitos internos después de setear: " + this.quesitosGanados);
-        reconstruirFichaVisual(); // Crucial: Reconstruir la ficha cada vez que los quesitos cambian
+        //System.out.println("DEBUG (Jugador): Quesitos internos después de setear: " + this.quesitosGanados);
+        reconstruirFichaVisual();
     }
 
 
@@ -110,20 +110,20 @@ public class Jugador {
         if (this.quesitosGanados == null) {
             return false;
         }
-        System.out.println("DEBUG (Jugador): Quesitos ganados (" + quesitosGanados.size() + ") vs Requeridos (" + totalCategoriasRequeridas + ")");
+        //System.out.println("DEBUG (Jugador): Quesitos ganados (" + quesitosGanados.size() + ") vs Requeridos (" + totalCategoriasRequeridas + ")");
         return quesitosGanados.size() >= totalCategoriasRequeridas;
     }
 
     // Este método es crucial para construir la representación visual de la ficha
     private void reconstruirFichaVisual() {
-        System.out.println("DEBUG (Jugador): Reconstruyendo ficha visual para " + getAlias());
+        //System.out.println("DEBUG (Jugador): Reconstruyendo ficha visual para " + getAlias());
         // Siempre empieza con una FichaBase limpia
         this.fichaVisual = new FichaBase(Color.WHITE); // Usa el color de prueba para la base
 
         // Aplica un decorador por cada quesito ganado
         if (quesitosGanados != null) {
             for (String categoria : quesitosGanados) {
-                System.out.println("DEBUG (Jugador): Aplicando decorador para categoría: " + categoria);
+                //System.out.println("DEBUG (Jugador): Aplicando decorador para categoría: " + categoria);
                 this.fichaVisual = aplicarDecoradorQuesito(this.fichaVisual, categoria);
             }
         }

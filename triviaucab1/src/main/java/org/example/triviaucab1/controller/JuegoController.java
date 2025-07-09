@@ -55,13 +55,12 @@ public class JuegoController {
 
     private GestorPreguntas gestorPreguntas;
     private Map<String, String> casillaIdToCategory = new HashMap<>();
-    private int totalCategoriasParaGanar; // NUEVO: Variable para almacenar el total de categorías de quesitos
+    private int totalCategoriasParaGanar;
 
 
     @FXML
     public void initialize() {
         gestorPreguntas = new GestorPreguntas("preguntasJuegoTrivia_final.json");
-        // NUEVO: Obtener el total de categorías de quesitos necesarias para ganar
         totalCategoriasParaGanar = gestorPreguntas.getTotalCategorias();
         System.out.println("Total de categorías de quesitos posibles para ganar: " + totalCategoriasParaGanar);
 
@@ -91,8 +90,8 @@ public class JuegoController {
                     if (id.equals("c")) {
                         type = "central";
                     } else if (casillasBlancas.contains(id)) {
-                        type = "normal"; // Estas son ahora tus "casillas especiales"
-                        category = null; // Las casillas normales/especiales no tienen categoría asociada
+                        type = "normal";
+                        category = null;
                     } else {
                         type = "pregunta";
                         if (category == null) {
@@ -126,9 +125,8 @@ public class JuegoController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        System.out.println("🧩 Nodos en el grafo: " + grafoTablero.getIdsNodos().size());
-        System.out.println("🧩 Nodos visuales encontrados: " + mapaIDaNodo.size());
+        System.out.println("Nodos en el grafo: " + grafoTablero.getIdsNodos().size());
+        //System.out.println("🧩 Nodos visuales encontrados: " + mapaIDaNodo.size());
         verificarConexiones();
     }
 
@@ -406,7 +404,8 @@ public class JuegoController {
                 if (dadoController != null) {
                     dadoController.deshabilitarBotonLanzar();
                 }
-                // No se llama a partida.siguienteTurno() porque el juego ha terminado.
+                Stage currentStage = (Stage) rootPane.getScene().getWindow();
+                navigateToMenuPrincipal(currentStage);
             });
         } else { // Este es el caso para casillas "normal" (ahora tratadas como especiales)
             System.out.println("Jugador en casilla especial. ¡Repites el turno!");
@@ -483,6 +482,7 @@ public class JuegoController {
             Scene scene = new Scene(loader.load());
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(scene);
+            stage.setMaximized(true);
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
@@ -577,16 +577,35 @@ public class JuegoController {
     }
 
     private void verificarConexiones() {
-        System.out.println("Conexiones del grafo:");
+        //System.out.println("Conexiones del grafo:");
         for (String id : grafoTablero.getIdsNodos()) {
             CasillaNode nodo = mapaIDaNodo.get(id);
             if (nodo != null) {
-                System.out.print("  " + id + " -> ");
+                //System.out.print("  " + id + " -> ");
                 for (CasillaNode vecino : grafoTablero.getVecinos(nodo)) {
                     System.out.print(vecino.getId() + " ");
                 }
-                System.out.println();
+                //System.out.println();
             }
         }
     }
+
+    /**
+     * Método para navegar de vuelta a la pantalla del menú principal.
+     * @param currentStage El Stage actual de la aplicación.
+     */
+    private void navigateToMenuPrincipal(Stage currentStage) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/triviaucab1/MenuPrincipalView.fxml"));
+            Scene scene = new Scene(loader.load());
+            currentStage.setScene(scene);
+            currentStage.setTitle("Trivia UCAB - Menú Principal");
+            currentStage.setMaximized(true);
+            currentStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("Error al cargar la vista del menú principal: " + e.getMessage());
+        }
+    }
+
 }

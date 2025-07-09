@@ -14,9 +14,6 @@ import java.io.IOException;
  */
 public class MenuPrincipalController {
 
-    // No necesitamos @FXML para los botones si solo los usamos en el ActionEvent
-    // @FXML private Button nuevaPartidaButton;
-
     /**
      * Maneja la acción cuando el botón "Partida nueva" es presionado.
      * Carga la ventana de selección de jugadores.
@@ -53,6 +50,7 @@ public class MenuPrincipalController {
             Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
             stage.setScene(scene);
             stage.setTitle("TRIVIA UCAB - Partida Guardada");
+            stage.setMaximized(true);
             stage.show();
         } catch (IOException e) {
             System.err.println("Error al cargar la ventana de Partida Guardada: " + e.getMessage());
@@ -74,7 +72,7 @@ public class MenuPrincipalController {
             Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
             stage.setScene(scene);
             stage.setTitle("TRIVIA UCAB - Estadísticas");
-            stage.setFullScreen(true);
+            stage.setMaximized(true);
             stage.show();
         } catch (IOException e) {
             System.err.println("Error al cargar la ventana de Estadísticas: " + e.getMessage());

@@ -24,8 +24,6 @@ public class PartidaGuardadaController {
     private void handleCargarPartida(ActionEvent event) {
         System.out.println("Botón 'Cargar Partida' presionado.");
         // TODO: Implementar la lógica para cargar la partida desde un JSON.
-        // Después de cargar, probablemente se debería ir a la Ventana de Juego.
-        // Por ahora, solo un mensaje de consola.
         System.out.println("Lógica de carga de partida aún no implementada.");
     }
 
@@ -43,7 +41,7 @@ public class PartidaGuardadaController {
             Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
             stage.setScene(scene);
             stage.setTitle("TRIVIA UCAB - Menú Principal");
-            stage.setFullScreen(true);
+            stage.setMaximized(true);
             stage.show();
         } catch (IOException e) {
             System.err.println("Error al cargar la ventana del Menú Principal: " + e.getMessage());

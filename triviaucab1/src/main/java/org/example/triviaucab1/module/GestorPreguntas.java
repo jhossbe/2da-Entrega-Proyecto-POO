@@ -39,11 +39,9 @@ public class GestorPreguntas {
                 }
                 preguntasPorCategoria.put(categoriaActual, preguntasDeEstaCategoria);
             }
-            // **FIN DE LA MODIFICACIÓN CLAVE**
-
             categoriasDisponibles.addAll(preguntasPorCategoria.keySet());
             System.out.println("Preguntas cargadas exitosamente desde " + rutaArchivoJson);
-            System.out.println("Categorías cargadas: " + categoriasDisponibles); // Debugging line
+            System.out.println("Categorías cargadas: " + categoriasDisponibles);
         } catch (IOException e) {
             System.err.println("Error al cargar preguntas desde JSON: " + e.getMessage());
             e.printStackTrace();
@@ -58,7 +56,6 @@ public class GestorPreguntas {
             listaPreguntas = preguntasPorCategoria.get(categoria);
             categoriaSeleccionada = categoria; // Usar la categoría solicitada
         } else {
-            // Si la categoría es nula o no existe, seleccionar una categoría aleatoria de las disponibles
             if (categoriasDisponibles.isEmpty()) {
                 System.err.println("No hay categorías disponibles para obtener preguntas.");
                 return null;
@@ -66,14 +63,12 @@ public class GestorPreguntas {
             Random rand = new Random();
             categoriaSeleccionada = categoriasDisponibles.get(rand.nextInt(categoriasDisponibles.size()));
             listaPreguntas = preguntasPorCategoria.get(categoriaSeleccionada);
-            System.out.println("Seleccionada categoría aleatoria: " + categoriaSeleccionada); // Debugging
+            System.out.println("Seleccionada categoría aleatoria: " + categoriaSeleccionada);
         }
 
         if (listaPreguntas != null && !listaPreguntas.isEmpty()) {
             Random rand = new Random();
             Pregunta preguntaSeleccionada = listaPreguntas.get(rand.nextInt(listaPreguntas.size()));
-            // Ya no es necesario llamar a setCategoria aquí, ya se hizo al cargar
-            // preguntaSeleccionada.setCategoria(categoriaSeleccionada); // ¡ELIMINA ESTA LÍNEA!
             return preguntaSeleccionada;
         } else {
             System.err.println("No hay preguntas disponibles para la categoría: " + categoriaSeleccionada);

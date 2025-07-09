@@ -191,7 +191,7 @@ public class PartidaNuevaController implements Initializable {
         if (result.isPresent() && result.get() == ButtonType.OK) {
             Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
             stage.close();
-            // System.exit(0);
+
         }
     }
 
