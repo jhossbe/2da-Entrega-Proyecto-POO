@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.paint.Color?>
+
+<VBox alignment="CENTER" prefHeight="400.0" prefWidth="600.0" spacing="20.0" style="-fx-background-color: #333333;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.triviaucab1.controller.PreguntaController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+    <children>
+        <Label fx:id="categoriaLabel" text="Categoría: " textFill="WHITE">
+            <font>
+                <Font name="System Bold" size="18.0" />
+            </font>
+        </Label>
+        <Label fx:id="preguntaLabel" alignment="CENTER" contentDisplay="CENTER" text="¿Cuál es la capital de Francia?" textAlignment="CENTER" textFill="WHITE" wrapText="true">
+            <font>
+                <Font size="24.0" />
+            </font>
+        </Label>
+        <TextField fx:id="respuestaTextField" promptText="Escribe tu respuesta aquí" />
+        <Button fx:id="enviarRespuestaButton" mnemonicParsing="false" onAction="#handleEnviarRespuesta" prefWidth="150.0" text="Enviar Respuesta">
+            <font>
+                <Font size="16.0" />
+            </font>
+        </Button>
+        <Label fx:id="resultadoLabel" alignment="CENTER" contentDisplay="CENTER" textAlignment="CENTER" textFill="WHITE" visible="false">
+            <font>
+                <Font name="System Bold" size="20.0" />
+            </font>
+        </Label>
+        <Button fx:id="continuarButton" mnemonicParsing="false" onAction="#handleContinuar" prefWidth="150.0" text="Continuar" visible="false">
+            <font>
+                <Font size="16.0" />
+            </font>
+        </Button>
+    </children>
+</VBox>

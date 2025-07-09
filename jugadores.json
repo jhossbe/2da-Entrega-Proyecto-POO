@@ -1,8 +1,25 @@
 [
+  {"email": "jugadorGanador@example.com",
+    "alias": "ElCampeon",
+    "quesitosGanadosNombres": [
+      "Arte y Literatura",
+      "Deportes",
+      "Geografía",
+      "Entretenimiento",
+      "Historia",
+      "Ciencia"
+    ],
+    "estadisticas": {
+      "partidasJugadas": 10,
+      "partidasGanadas": 5,
+      "preguntasCorrectas": 50,
+      "preguntasIncorrectas": 10
+    }
+  },
   {
     "email": "jugador1@example.com",
     "alias": "Jugador1",
-    "quesitos": [],
+    "quesitosGanadosNombres": [],
     "estadisticas": {
       "partidasJugadas": 0,
       "partidasGanadas": 0,
@@ -13,7 +30,7 @@
   {
     "email": "jugador2@example.com",
     "alias": "Jugador2",
-    "quesitos": ["Geografia"],
+    "quesitosGanadosNombres": ["Geografía"],
     "estadisticas": {
       "partidasJugadas": 3,
       "partidasGanadas": 1,
@@ -24,7 +41,7 @@
   {
     "email": "jugador3@example.com",
     "alias": "Jugador3",
-    "quesitos": [],
+    "quesitosGanadosNombres": [],
     "estadisticas": {
       "partidasJugadas": 0,
       "partidasGanadas": 0,
@@ -35,7 +52,7 @@
   {
     "email": "jugador4@example.com",
     "alias": "Jugador4",
-    "quesitos": [],
+    "quesitosGanadosNombres": [],
     "estadisticas": {
       "partidasJugadas": 0,
       "partidasGanadas": 0,
@@ -46,7 +63,7 @@
   {
     "email": "jugador5@example.com",
     "alias": "Jugador5",
-    "quesitos": [],
+    "quesitosGanadosNombres": [],
     "estadisticas": {
       "partidasJugadas": 0,
       "partidasGanadas": 0,
@@ -57,7 +74,7 @@
   {
     "email": "jugador6@example.com",
     "alias": "Jugador6",
-    "quesitos": [],
+    "quesitosGanadosNombres": [],
     "estadisticas": {
       "partidasJugadas": 0,
       "partidasGanadas": 0,

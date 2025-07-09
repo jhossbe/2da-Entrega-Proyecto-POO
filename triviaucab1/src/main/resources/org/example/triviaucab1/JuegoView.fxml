@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.canvas.Canvas?> <?import javafx.scene.control.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.*?>
@@ -13,8 +14,8 @@
 
     <children>
         <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#5c6369" height="1110.0" layoutX="-26.0" layoutY="-22.0" stroke="#615d5d" strokeType="INSIDE" width="1697.0" />
+        <Canvas fx:id="fichaJugadorCanvas" layoutX="1000.0" layoutY="150.0" width="150.0" height="150.0" />
 
-        <!-- Panel de información del juego -->
         <Label fx:id="jugadorEnTurnoLabel" layoutX="1000.0" layoutY="50.0" text="Jugador Actual: " textFill="WHITE">
             <font>
                 <Font name="System Bold" size="24.0" />

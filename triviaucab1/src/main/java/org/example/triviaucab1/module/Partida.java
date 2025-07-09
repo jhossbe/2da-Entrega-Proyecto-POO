@@ -6,48 +6,70 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.time.Duration;
+import java.util.Collections; // <--- AÑADE ESTA IMPORTACIÓN
+import java.util.Random;      // <--- AÑADE ESTA IMPORTACIÓN
 
 public class Partida {
     private List<Jugador> jugadores;
     private Tablero tablero; // Asumiendo que Tablero es serializable o no se guarda directamente
-    private int jugadorEnTurnoIndex;
-    private Map<Jugador, Integer> posiciones; // <--- Esto puede dar problemas al serializar con Jackson
-    private LocalDateTime fechaInicio; // <--- Esto puede dar problemas al serializar con Jackson
+    private int jugadorActualIndex; // Nombre consistente: jugadorActualIndex
+    // Recomendación: Cambiado a Map<String, Integer> para una serialización/deserialización robusta
+    private Map<String, Integer> posiciones; // Map<ID Único del Jugador (ej. email), Posición>
+    private LocalDateTime fechaInicio;
     private LocalDateTime fechaFin;
     private boolean partidaTerminada;
     private long tiempoTotalSegundos;
-// private List<Pregunta> bancoDePreguntas; // Lo añadiremos cuando tengamos la clase Pregunta
-
+    private Random random; // <--- AÑADE ESTE CAMPO
 
     public Partida() {
         this.jugadores = new ArrayList<>();
-        this.tablero = new Tablero(); // Asegúrate de que Tablero tenga un constructor por defecto
+        this.tablero = new Tablero();
+        // Inicializa el mapa de posiciones con clave String
         this.posiciones = new HashMap<>();
-        // this.quesitosObtenidos = new HashMap<>(); // ELIMINADO
-        this.jugadorEnTurnoIndex = 0;
-        this.fechaInicio = LocalDateTime.now(); // Se inicializa al crear la partida
+        this.jugadorActualIndex = 0;
+        this.fechaInicio = LocalDateTime.now();
         this.partidaTerminada = false;
         this.tiempoTotalSegundos = 0;
+        this.random = new Random(); // <--- INICIALIZA Random
     }
 
+    // El método `iniciar` debería encargarse de las posiciones iniciales y la configuración
     public void iniciar(List<Jugador> jugadoresSeleccionados) {
         this.jugadores = jugadoresSeleccionados;
+        // Llena el mapa de posiciones usando el ID único del jugador (ej. email o alias)
+        this.posiciones.clear(); // Limpia cualquier posición anterior
         for (Jugador jugador : jugadoresSeleccionados) {
-            this.posiciones.put(jugador, 0);
-            // No necesitamos inicializar quesitos aquí, ya se inicializan en el constructor de Jugador
+            // Usando el email como clave única para el seguimiento de la posición
+            if (jugador.getEmail() != null && !jugador.getEmail().isEmpty()) {
+                this.posiciones.put(jugador.getEmail(), 0); // Todos los jugadores empiezan en la posición 0 (o equivalente a 'c')
+            } else {
+                System.err.println("Advertencia: El jugador " + jugador.getAlias() + " no tiene email para el seguimiento de posición.");
+                // Alternativa: usa el alias si el email no está disponible, pero asegúrate de que el alias sea único.
+                this.posiciones.put(jugador.getAlias(), 0);
+            }
         }
-        this.jugadorEnTurnoIndex = 0;
+        // Importante: Aleatoriza el orden aquí o en el método que llama (JuegoController.setPartida)
+        establecerOrdenAleatorio(); // <--- Llama para aleatorizar el orden
         this.partidaTerminada = false;
         this.fechaInicio = LocalDateTime.now();
         this.tiempoTotalSegundos = 0;
         System.out.println("Partida iniciada con " + jugadores.size() + " jugadores.");
     }
 
-    public Jugador getJugadorEnTurno() {
+    // Nuevo: Establecer el orden aleatorio de los jugadores al inicio de la partida
+    public void establecerOrdenAleatorio() {
+        if (jugadores != null && !jugadores.isEmpty()) {
+            java.util.Collections.shuffle(jugadores, random);
+            this.jugadorActualIndex = 0; // Reiniciar al primer jugador del nuevo orden
+            System.out.println("Orden de jugadores aleatorizado.");
+        }
+    }
+
+    public Jugador getJugadorActual() { // Renombrado de getJugadorEnTurno para coincidir con sugerencias anteriores
         if (jugadores.isEmpty()) {
             return null;
         }
-        return jugadores.get(jugadorEnTurnoIndex);
+        return jugadores.get(jugadorActualIndex);
     }
 
     public void siguienteTurno() {
@@ -55,19 +77,28 @@ public class Partida {
             System.out.println("No hay jugadores en la partida para avanzar el turno.");
             return;
         }
-        this.jugadorEnTurnoIndex = (this.jugadorEnTurnoIndex + 1) % jugadores.size();
-        System.out.println("Es el turno de: " + getJugadorEnTurno().getAlias());
+        this.jugadorActualIndex = (this.jugadorActualIndex + 1) % jugadores.size();
+        System.out.println("Cambiando turno. Ahora es el turno de: " + getJugadorActual().getAlias());
+        // Aquí podrías añadir lógica para verificar el ganador después de cada turno
+        // if (verificarGanador(getJugadorActual())) {
+        //     System.out.println("¡" + getJugadorActual().getAlias() + " ha ganado la partida!");
+        //     // Lógica para finalizar el juego
+        // }
     }
 
+    // Debes asegurarte de que `jugador.getEmail()` sea realmente la clave correcta a usar.
+    // Si planeas usar `alias` como clave, asegúrate de que `alias` sea único entre los jugadores.
     public void moverJugador(Jugador jugador, int pasos) {
-        if (!posiciones.containsKey(jugador)) {
-            System.out.println("Error: El jugador " + jugador.getAlias() + " no está en esta partida.");
+        String playerKey = jugador.getEmail(); // O jugador.getAlias()
+        if (playerKey == null || !posiciones.containsKey(playerKey)) {
+            System.out.println("Error: El jugador " + jugador.getAlias() + " no está en esta partida o no tiene clave de posición.");
             return;
         }
-        int currentPos = posiciones.getOrDefault(jugador, 0);
-        // Asegúrate de que tablero.getRutaPrincipalCasillaIds() no sea null/vacío
-        int newPos = (currentPos + pasos) % tablero.getRutaPrincipalCasillaIds().length;
-        posiciones.put(jugador, newPos);
+        int currentPos = posiciones.getOrDefault(playerKey, 0);
+        // Asegúrate de que tablero.getRutaPrincipalCasillaIds() esté correctamente inicializado y sea accesible
+        // (Necesitarás una clase Tablero que tenga este método y un array de IDs de casillas válidas)
+        int newPos = (currentPos + pasos) % tablero.getRutaPrincipalCasillaIds().length; // Esto asume un camino lineal
+        posiciones.put(playerKey, newPos);
         System.out.println(jugador.getAlias() + " se movió de la posición " + currentPos + " a la posición " + newPos);
     }
 
@@ -79,7 +110,7 @@ public class Partida {
      */
     public void añadirQuesito(Jugador jugador, String categoria) {
         if (jugador != null) {
-            jugador.addQuesito(categoria); // <--- USA EL MÉTODO DEL JUGADOR
+            jugador.addQuesito(categoria);
             System.out.println(jugador.getAlias() + " ganó el quesito de " + categoria);
         }
     }
@@ -92,7 +123,7 @@ public class Partida {
      */
     public boolean verificarGanador(Jugador jugador) {
         int quesitosNecesarios = 6;
-        return jugador != null && jugador.getQuesitos().size() >= quesitosNecesarios;
+        return jugador != null && jugador.getQuesitosGanadosNombres().size() >= quesitosNecesarios;
     }
 
     public void terminarPartida() {
@@ -101,13 +132,15 @@ public class Partida {
         this.tiempoTotalSegundos = Duration.between(fechaInicio, fechaFin).getSeconds();
     }
 
-    // Getters y Setters (mantenerlos para la serialización básica, aunque algunos den problemas)
+    // Getters y Setters
     public List<Jugador> getJugadores() {
         return jugadores;
     }
 
     public void setJugadores(List<Jugador> jugadores) {
         this.jugadores = jugadores;
+        // Al establecer los jugadores externamente, es posible que quieras reinicializar posiciones y orden
+        iniciar(jugadores); // Reinicializa las posiciones y aleatoriza el orden si se establece desde fuera
     }
 
     public Tablero getTablero() {
@@ -118,24 +151,24 @@ public class Partida {
         this.tablero = tablero;
     }
 
-    public int getJugadorEnTurnoIndex() {
-        return jugadorEnTurnoIndex;
+    // Nombre consistente: getJugadorActualIndex / setJugadorActualIndex
+    public int getJugadorActualIndex() {
+        return jugadorActualIndex;
     }
 
-    public void setJugadorEnTurnoIndex(int jugadorEnTurnoIndex) {
-        this.jugadorEnTurnoIndex = jugadorEnTurnoIndex;
+    public void setJugadorActualIndex(int jugadorActualIndex) {
+        this.jugadorActualIndex = jugadorActualIndex;
     }
 
-    public Map<Jugador, Integer> getPosiciones() {
+    // El mapa de posiciones debería basarse en una clave String para una serialización adecuada
+    public Map<String, Integer> getPosiciones() {
         return posiciones;
     }
 
-    public void setPosiciones(Map<Jugador, Integer> posiciones) {
+    public void setPosiciones(Map<String, Integer> posiciones) {
         this.posiciones = posiciones;
     }
 
-    // public Map<Jugador, List<String>> getQuesitosObtenidos() { return quesitosObtenidos; } // ELIMINADO
-// public void setQuesitosObtenidos(Map<Jugador, List<String>> quesitosObtenidos) { this.quesitosObtenidos = quesitosObtenidos; } // ELIMINADO
     public LocalDateTime getFechaInicio() {
         return fechaInicio;
     }
@@ -166,5 +199,15 @@ public class Partida {
 
     public void setTiempoTotalSegundos(long tiempoTotalSegundos) {
         this.tiempoTotalSegundos = tiempoTotalSegundos;
+    }
+
+    // También podrías necesitar métodos para obtener un jugador por su clave (email/alias)
+    public Jugador getJugadorByEmail(String email) {
+        for (Jugador jugador : jugadores) {
+            if (jugador.getEmail() != null && jugador.getEmail().equals(email)) {
+                return jugador;
+            }
+        }
+        return null;
     }
 }

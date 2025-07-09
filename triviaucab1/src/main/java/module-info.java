@@ -11,5 +11,5 @@ module org.example.triviaucab1 {
     exports org.example.triviaucab1.controller;
     opens org.example.triviaucab1.controller to javafx.fxml;
     exports org.example.triviaucab1.module;
-    opens org.example.triviaucab1.module to javafx.fxml;
+    opens org.example.triviaucab1.module to  javafx.fxml, com.fasterxml.jackson.databind;
 }

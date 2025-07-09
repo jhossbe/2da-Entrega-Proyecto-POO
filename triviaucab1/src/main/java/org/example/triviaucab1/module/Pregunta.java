@@ -1,54 +1,46 @@
 package org.example.triviaucab1.module;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Pregunta {
     private String categoria;
-    private String textoPregunta;
-    private List<String> opciones;
-    private String respuestaCorrecta;
+    private String pregunta;
+    private String respuesta;
 
-    public Pregunta(String categoria, String textoPregunta, List<String> opciones, String respuestaCorrecta) {
-        this.categoria = categoria;
-        this.textoPregunta = textoPregunta;
-        this.opciones = opciones;
-        this.respuestaCorrecta = respuestaCorrecta;
+    @JsonCreator
+    public Pregunta(
+            @JsonProperty("pregunta") String textoPregunta,
+            @JsonProperty("respuesta") String respuestaCorrecta) {
+        this.pregunta = textoPregunta;
+        this.respuesta = respuestaCorrecta;
     }
 
-    // Getters y Setters
+    public Pregunta() {
+    }
+
     public String getCategoria() {
         return categoria;
+    }
+
+    public String getTextoPregunta() {
+        return this.pregunta;
+    }
+
+    public boolean esRespuestaCorrecta(String respuestaUsuario) {
+        return this.respuesta.trim().equalsIgnoreCase(respuestaUsuario.trim());
+    }
+
+    public String getRespuestaCorrecta() {
+        return this.respuesta;
     }
 
     public void setCategoria(String categoria) {
         this.categoria = categoria;
     }
 
-    public String getTextoPregunta() {
-        return textoPregunta;
-    }
-
-    public void setTextoPregunta(String textoPregunta) {
-        this.textoPregunta = textoPregunta;
-    }
-
-    public List<String> getOpciones() {
-        return opciones;
-    }
-
-    public void setOpciones(List<String> opciones) {
-        this.opciones = opciones;
-    }
-
-    public String getRespuestaCorrecta() {
-        return respuestaCorrecta;
-    }
-
-    public void setRespuestaCorrecta(String respuestaCorrecta) {
-        this.respuestaCorrecta = respuestaCorrecta;
-    }
-
-    public boolean esRespuestaCorrecta(String respuestaUsuario) {
-        return this.respuestaCorrecta.equalsIgnoreCase(respuestaUsuario);
+    @Override
+    public String toString() {
+        return "Categoría: " + categoria + ", Pregunta: " + pregunta + ", Respuesta: " + respuesta;
     }
 }
