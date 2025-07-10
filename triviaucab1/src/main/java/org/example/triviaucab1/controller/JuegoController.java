@@ -7,20 +7,20 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.application.Platform;
+import org.example.triviaucab1.module.JsonService;
 import org.example.triviaucab1.module.GestorEstadisticas;
 import org.example.triviaucab1.fichadecorator.Ficha;
+import org.example.triviaucab1.module.JsonService;
 import org.example.triviaucab1.module.GestorPreguntas;
 import org.example.triviaucab1.module.Jugador;
 import org.example.triviaucab1.module.Partida;
@@ -30,20 +30,24 @@ import org.example.triviaucab1.module.tablero.GrafoTablero;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Alert; // NUEVO: Importar Alert
-import javafx.scene.control.Alert.AlertType; // NUEVO: Importar AlertType
-
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
+/**
+ * Controlador principal del juego. Gestiona la lógica del tablero, los turnos de los jugadores,
+ * las interacciones con las casillas, las preguntas y la integración con las estadísticas y guardado de partida.
+ */
 public class JuegoController {
-
     @FXML private AnchorPane rootPane;
     @FXML private Label jugadorEnTurnoLabel;
-    @FXML private VBox categoriasJugadorVBox; // No usado en este ejemplo, pero se mantiene
-    @FXML private Label tiempoRespuestaLabel; // No usado en este ejemplo, pero se mantiene
+    @FXML private VBox categoriasJugadorVBox;
+    @FXML private Label tiempoRespuestaLabel;
     @FXML private Canvas fichaEnTableroCanvas;
     @FXML private Canvas fichaJugadorCanvas;
+    private JsonService jsonService;
     private GestorEstadisticas gestorEstadisticas;
     private GrafoTablero grafoTablero;
     private int ultimoValorDado = 0;
@@ -53,21 +57,23 @@ public class JuegoController {
     private Map<CasillaNode, Rectangle> mapaNodoARect = new HashMap<>();
     private Partida partida;
     private DadoController dadoController;
-
     private GestorPreguntas gestorPreguntas;
     private Map<String, String> casillaIdToCategory = new HashMap<>();
     private int totalCategoriasParaGanar;
 
-
+    /**
+     * Método de inicialización del controlador. Se llama automáticamente al cargar el FXML.
+     * Configura el tablero, carga las preguntas, inicializa gestores y elementos de la UI.
+     */
     @FXML
     public void initialize() {
         gestorPreguntas = new GestorPreguntas("preguntasJuegoTrivia_final.json");
         totalCategoriasParaGanar = gestorPreguntas.getTotalCategorias();
         System.out.println("Total de categorías de quesitos posibles para ganar: " + totalCategoriasParaGanar);
         gestorEstadisticas = new GestorEstadisticas();
+        jsonService = new JsonService();
         grafoTablero = new GrafoTablero();
 
-        // Estas son las definiciones de tus casillas y categorías
         addCategories(casillaIdToCategory, "Geografía", "1", "14", "17", "26", "44", "47", "53", "58", "62");
         addCategories(casillaIdToCategory, "Historia", "2", "19", "22", "31", "41", "45", "54", "57", "63");
         addCategories(casillaIdToCategory, "Deportes", "3", "24", "27", "36", "40", "46", "51", "55", "64");
@@ -77,7 +83,6 @@ public class JuegoController {
         Set<String> casillasBlancas = new HashSet<>(Arrays.asList("8","10", "13","15", "18", "20","23", "25", "28", "30_path","33", "35"));
 
         casillaIdToCategory.put("c", "Central");
-
         for (Node node : rootPane.getChildren()) {
             if (node instanceof Rectangle rect && rect.getId() != null) {
                 String id = rect.getId();
@@ -99,7 +104,6 @@ public class JuegoController {
                             System.err.println("Advertencia: Casilla " + id + " marcada como pregunta pero sin categoría asignada.");
                         }
                     }
-
                     CasillaNode nodo = new CasillaNode(id, x, y, type, category);
                     grafoTablero.agregarNodo(nodo);
                     mapaIDaNodo.put(id, nodo);
@@ -108,6 +112,15 @@ public class JuegoController {
             }
         }
         conectarCasillasCorrectamente();
+        if (fichaEnTableroCanvas != null) {
+            fichaEnTableroCanvas.setWidth(39);
+            fichaEnTableroCanvas.setHeight(39);
+            fichaEnTableroCanvas.setMouseTransparent(true);
+            fichaEnTableroCanvas.setVisible(false);
+            System.out.println("DEBUG (JuegoController): fichaEnTableroCanvas inicializado con ancho: " + fichaEnTableroCanvas.getWidth() + ", alto: " + fichaEnTableroCanvas.getHeight());
+        } else {
+            System.err.println("ERROR (JuegoController): fichaEnTableroCanvas es NULO. Asegúrate de que el fx:id esté en el FXML.");
+        }
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/triviaucab1/DadoView.fxml"));
@@ -121,12 +134,14 @@ public class JuegoController {
             e.printStackTrace();
         }
         System.out.println("Nodos en el grafo: " + grafoTablero.getIdsNodos().size());
-        //System.out.println("🧩 Nodos visuales encontrados: " + mapaIDaNodo.size());
         verificarConexiones();
     }
 
     /**
-     * Método auxiliar para añadir múltiples IDs a una categoría en el mapa.
+     * Método auxiliar para añadir múltiples IDs de casillas a una categoría en el mapa.
+     * @param map El mapa de IDs de casillas a categorías.
+     * @param category La categoría a la que pertenecen los IDs.
+     * @param ids Un array de IDs de casillas.
      */
     private void addCategories(Map<String, String> map, String category, String... ids) {
         for (String id : ids) {
@@ -134,21 +149,32 @@ public class JuegoController {
         }
     }
 
+    /**
+     * Establece la instancia de GestorEstadisticas para que el controlador pueda actualizar las estadísticas.
+     * @param gestorEstadisticas La instancia de GestorEstadisticas.
+     */
     public void setGestorEstadisticas(GestorEstadisticas gestorEstadisticas) {
         this.gestorEstadisticas = gestorEstadisticas;
     }
 
     /**
      * Establece la partida actual y configura el jugador inicial.
-     * Este método DEBE SER LLAMADO por la clase que inicia la partida (ej. MainPrincipal).
+     * Este método DEBE SER LLAMADO por la clase que inicia la partida (ej. MenuPrincipalController o PartidaGuardadaController).
      * @param partida La instancia de la partida.
      */
     public void setPartida(Partida partida) {
         this.partida = partida;
-        System.out.println("Partida recibida con " + partida.getJugadores().size() + " jugadores.");
-        actualizarUIJugadorActual();
-        if (dadoController != null) {
-            dadoController.habilitarBotonLanzar();
+        //System.out.println("DEBUG (JuegoController): Partida recibida en setPartida con " + (partida != null ? partida.getJugadores().size() : "null") + " jugadores.");
+        //System.out.println("DEBUG (JuegoController): Tiempo de respuesta de la partida recibida: " + (partida != null ? partida.getTiempoRespuesta() : "null"));
+
+        if (partida != null && !partida.getJugadores().isEmpty()) {
+            actualizarUIJugadorActual();
+            if (dadoController != null) {
+                dadoController.habilitarBotonLanzar();
+            }
+        } else {
+            System.err.println("Error: Partida recibida en JuegoController es nula o no contiene jugadores.");
+            navigateToMenuPrincipal((Stage) rootPane.getScene().getWindow());
         }
     }
 
@@ -156,16 +182,14 @@ public class JuegoController {
      * Actualiza toda la interfaz de usuario para reflejar al jugador que tiene el turno.
      * Esto incluye el Label del nombre, la ficha visual de quesitos, y la posición de la ficha en el tablero.
      */
-
     public void actualizarUIJugadorActual() {
         Jugador jugadorEnTurno = partida.getJugadorActual();
 
         if (jugadorEnTurno == null) {
             System.err.println("Error: No hay jugador en turno para actualizar la UI.");
-            fichaEnTableroCanvas.setVisible(false);
+            if (fichaEnTableroCanvas != null) fichaEnTableroCanvas.setVisible(false);
             return;
         }
-
         if (jugadorEnTurnoLabel != null) {
             jugadorEnTurnoLabel.setText("Jugador Actual: " + jugadorEnTurno.getAlias());
         }
@@ -179,38 +203,32 @@ public class JuegoController {
         CasillaNode casillaDelJugadorEnGrafo = mapaIDaNodo.get(idCasillaJugador);
 
         if (casillaDelJugadorEnGrafo == null) {
-            System.err.println("❌ ERROR: La casilla '" + idCasillaJugador + "' del jugador no se encontró en el tablero.");
-            fichaEnTableroCanvas.setVisible(false);
+            System.err.println("ERROR: La casilla '" + idCasillaJugador + "' del jugador no se encontró en el tablero.");
+            if (fichaEnTableroCanvas != null) fichaEnTableroCanvas.setVisible(false);
             return;
         }
-        // Mueve el canvas a la posición de la casilla
-        fichaEnTableroCanvas.setLayoutX(casillaDelJugadorEnGrafo.getX() - fichaEnTableroCanvas.getWidth()/2);
-        fichaEnTableroCanvas.setLayoutY(casillaDelJugadorEnGrafo.getY() - fichaEnTableroCanvas.getHeight()/2);
-        fichaEnTableroCanvas.setVisible(true);
-
-        // DIBUJA la ficha decorada sobre el tablero central
-        dibujarFichaEnTablero(jugadorEnTurno);
-        // Dibuja la ficha en el canvas lateral
+        if (fichaEnTableroCanvas != null) {
+            fichaEnTableroCanvas.setLayoutX(casillaDelJugadorEnGrafo.getX() - fichaEnTableroCanvas.getWidth()/2);
+            fichaEnTableroCanvas.setLayoutY(casillaDelJugadorEnGrafo.getY() - fichaEnTableroCanvas.getHeight()/2);
+            fichaEnTableroCanvas.setVisible(true);
+            dibujarFichaEnTablero(jugadorEnTurno);
+        }
         dibujarFichaDelJugador(jugadorEnTurno);
-
         System.out.println("🔄 UI actualizada para: " + jugadorEnTurno.getAlias() + " en casilla: " + idCasillaJugador);
         if (dadoController != null) {
             dadoController.habilitarBotonLanzar();
         }
     }
 
-
     /**
-     * Dibuja la ficha del jugador dado en el Canvas dedicado.
-     * Ahora recibe el jugador como parámetro.
+     * Dibuja la ficha del jugador dado en el Canvas dedicado (panel lateral).
+     * @param jugador El objeto Jugador cuya ficha visual se va a dibujar.
      */
     public void dibujarFichaDelJugador(Jugador jugador) {
         if (fichaJugadorCanvas != null && jugador != null && jugador.getFichaVisual() != null) {
             GraphicsContext gc = fichaJugadorCanvas.getGraphicsContext2D();
             gc.clearRect(0, 0, fichaJugadorCanvas.getWidth(), fichaJugadorCanvas.getHeight());
-
             Ficha fichaADibujar = jugador.getFichaVisual();
-
             double canvasWidth = fichaJugadorCanvas.getWidth();
             double canvasHeight = fichaJugadorCanvas.getHeight();
             double radius = Math.min(canvasWidth, canvasHeight) / 2.2;
@@ -220,10 +238,14 @@ public class JuegoController {
             fichaADibujar.dibujar(gc, centerX, centerY, radius);
             System.out.println("Ficha visual dibujada para: " + jugador.getAlias());
         } else {
-            System.err.println("Error: No se pudo dibujar la ficha. Canvas no inicializado o Jugador/Ficha es nulo.");
+            System.err.println("Error: No se pudo dibujar la ficha. Canvas lateral no inicializado o Jugador/Ficha es nulo.");
         }
     }
 
+    /**
+     * Dibuja la ficha del jugador dado en el Canvas que se mueve sobre el tablero.
+     * @param jugador El objeto Jugador cuya ficha visual se va a dibujar.
+     */
     private void dibujarFichaEnTablero(Jugador jugador) {
         if (fichaEnTableroCanvas != null && jugador != null && jugador.getFichaVisual() != null) {
             GraphicsContext gc = fichaEnTableroCanvas.getGraphicsContext2D();
@@ -235,9 +257,15 @@ public class JuegoController {
             double centerX = canvasWidth / 2;
             double centerY = canvasHeight / 2;
             fichaADibujar.dibujar(gc, centerX, centerY, radius);
+        } else {
+            System.err.println("Error: No se pudo dibujar la ficha en el tablero. Canvas de tablero no inicializado o Jugador/Ficha es nulo.");
         }
     }
 
+    /**
+     * Maneja el lanzamiento del dado y muestra los movimientos posibles al jugador.
+     * @param valorDado El valor obtenido del dado.
+     */
     public void lanzarYMostrarMovimientos(int valorDado) {
         this.ultimoValorDado = valorDado;
         this.puedeMover = true;
@@ -247,16 +275,13 @@ public class JuegoController {
             System.err.println("No hay jugador en turno para lanzar el dado.");
             return;
         }
-
-        // Limpiar resaltado de casillas anteriores
         for (Rectangle rect : mapaNodoARect.values()) {
             rect.setStroke(Color.BLACK);
             rect.setStrokeWidth(1);
         }
-
         CasillaNode casillaActualDelJugador = mapaIDaNodo.get(jugadorEnTurno.getCasillaActualId());
         if (casillaActualDelJugador == null) {
-            System.err.println("Error: Posición de casilla actual del jugador no válida o no encontrada en el mapa.");
+            System.err.println("Error: Posición de casilla actual del jugador no válida o no encontrada en el mapa. Reiniciando a 'c'.");
             casillaActualDelJugador = mapaIDaNodo.get("c");
             jugadorEnTurno.setCasillaActualId("c");
 
@@ -264,36 +289,29 @@ public class JuegoController {
                 System.err.println("Error grave: Casilla central 'c' no encontrada en el tablero. No se puede continuar.");
                 return;
             }
-            // AQUÍ ya NO debes mover fichaEnTablero, solo el canvas:
-            fichaEnTableroCanvas.setLayoutX(casillaActualDelJugador.getX() - fichaEnTableroCanvas.getWidth()/2);
-            fichaEnTableroCanvas.setLayoutY(casillaActualDelJugador.getY() - fichaEnTableroCanvas.getHeight()/2);
-            dibujarFichaEnTablero(jugadorEnTurno);
+            if (fichaEnTableroCanvas != null) {
+                fichaEnTableroCanvas.setLayoutX(casillaActualDelJugador.getX() - fichaEnTableroCanvas.getWidth()/2);
+                fichaEnTableroCanvas.setLayoutY(casillaActualDelJugador.getY() - fichaEnTableroCanvas.getHeight()/2);
+                dibujarFichaEnTablero(jugadorEnTurno);
+            }
         }
-
-        // Obtener todos los destinos posibles sin filtrar aún
         List<CasillaNode> posiblesSinFiltrar = grafoTablero.encontrarDestinosConPasos(casillaActualDelJugador, valorDado);
-        movimientosPosibles.clear(); // Limpiar la lista para añadir solo los movimientos válidos
-
-        // Determinar si el jugador tiene todos los quesitos para ir a la casilla central
+        movimientosPosibles.clear();
         boolean jugadorTieneTodosLosQuesitos = jugadorEnTurno.tieneTodosLosQuesitos(totalCategoriasParaGanar);
-
-        // Filtrar movimientos: la casilla 'c' solo es un destino válido si el jugador tiene todos los quesitos
         for (CasillaNode destino : posiblesSinFiltrar) {
             if (destino.getId().equals("c")) {
                 if (jugadorTieneTodosLosQuesitos) {
-                    movimientosPosibles.add(destino); // Añadir 'c' solo si el jugador cumple la condición
+                    movimientosPosibles.add(destino);
                 } else {
                     System.out.println("Jugador " + jugadorEnTurno.getAlias() + " no tiene todos los quesitos. La casilla central ('c') no es un destino válido.");
                 }
             } else {
-                movimientosPosibles.add(destino); // Todas las demás casillas son siempre destinos válidos
+                movimientosPosibles.add(destino);
             }
         }
-
-        System.out.println("🎯 Movimientos posibles desde " + casillaActualDelJugador.getId() + " con dado " + valorDado + ":");
-
+        System.out.println("Movimientos posibles desde " + casillaActualDelJugador.getId() + " con dado " + valorDado + ":");
         if (movimientosPosibles.isEmpty()) {
-            System.out.println("   ❌ No hay movimientos posibles (o todos fueron filtrados). Pasando el turno.");
+            System.out.println("No hay movimientos posibles (o todos fueron filtrados). Pasando el turno.");
             puedeMover = false;
             partida.siguienteTurno();
             actualizarUIJugadorActual();
@@ -306,7 +324,7 @@ public class JuegoController {
                 rect.setStrokeWidth(4);
                 System.out.println("   → " + destino.getId());
             } else {
-                System.err.println("   ⚠️ No se encontró rectángulo para casilla: " + destino.getId());
+                System.err.println("No se encontró rectángulo para casilla: " + destino.getId());
             }
         }
         if (dadoController != null) {
@@ -314,10 +332,15 @@ public class JuegoController {
         }
     }
 
+    /**
+     * Maneja el evento de clic en una casilla del tablero.
+     * Permite al jugador mover su ficha a una casilla válida.
+     * @param event El evento de ratón.
+     */
     @FXML
     private void onCasillaClick(MouseEvent event) {
         if (!puedeMover) {
-            System.out.println("🚫 No se puede mover en este momento (esperando lanzamiento de dado o acción).");
+            System.out.println("No se puede mover en este momento (esperando lanzamiento de dado o acción).");
             return;
         }
 
@@ -333,10 +356,11 @@ public class JuegoController {
                     return;
                 }
                 jugadorEnTurno.setCasillaActualId(idDestino);
-                fichaEnTableroCanvas.setLayoutX(nodoDestino.getX() - fichaEnTableroCanvas.getWidth()/2);
-                fichaEnTableroCanvas.setLayoutY(nodoDestino.getY() - fichaEnTableroCanvas.getHeight()/2);
-                // Dibuja la ficha decorada sobre el tablero después de mover
-                dibujarFichaEnTablero(jugadorEnTurno);
+                if (fichaEnTableroCanvas != null) {
+                    fichaEnTableroCanvas.setLayoutX(nodoDestino.getX() - fichaEnTableroCanvas.getWidth()/2);
+                    fichaEnTableroCanvas.setLayoutY(nodoDestino.getY() - fichaEnTableroCanvas.getHeight()/2);
+                    dibujarFichaEnTablero(jugadorEnTurno); // Redibuja la ficha en su nueva posición
+                }
 
                 movimientosPosibles.clear();
                 for (Rectangle r : mapaNodoARect.values()) {
@@ -344,7 +368,7 @@ public class JuegoController {
                     r.setStrokeWidth(1);
                 }
 
-                System.out.println("✅ Movimiento de " + jugadorEnTurno.getAlias() + " realizado a: " + idDestino);
+                System.out.println("Movimiento de " + jugadorEnTurno.getAlias() + " realizado a: " + idDestino);
                 puedeMover = false;
                 PauseTransition pause = new PauseTransition(Duration.seconds(0.5));
                 pause.setOnFinished(e -> {
@@ -353,14 +377,19 @@ public class JuegoController {
                 pause.play();
 
             } else {
-                System.out.println("❌ Movimiento inválido a: " + idDestino + ". No es un destino posible.");
+                System.out.println("Movimiento inválido a: " + idDestino + ". No es un destino posible.");
             }
         } else {
             System.out.println("No se hizo clic en una casilla válida.");
         }
     }
 
-    // MÉTODO PARA MANEJAR LA ACCIÓN DESPUÉS DE QUE EL JUGADOR SE MUEVE
+    /**
+     * Maneja la acción que ocurre después de que un jugador se ha movido a una casilla.
+     * Esto puede ser mostrar una pregunta, verificar victoria, o dar un turno extra.
+     * @param jugador El jugador que acaba de mover.
+     * @param casillaDestino El nodo de la casilla a la que se movió el jugador.
+     */
     private void manejarAccionDespuesDeMovimiento(Jugador jugador, CasillaNode casillaDestino) {
         String tipoCasilla = casillaDestino.getTipoCasilla();
         String categoriaCasilla = casillaDestino.getCategoriaAsociada();
@@ -385,9 +414,10 @@ public class JuegoController {
                         PreguntaController preguntaController = loader.getController();
 
                         preguntaController.setJuegoController(this);
-                        preguntaController.setPregunta(finalPregunta);
-                        // PASO CLAVE: Pasa el tiempo límite desde la partida a la pregunta
                         preguntaController.setTiempoLimiteSegundos(partida.getTiempoRespuesta());
+                        System.out.println("DEBUG (JuegoController): Pasando tiempo de respuesta a PreguntaController: " + partida.getTiempoRespuesta() + " segundos.");
+                        preguntaController.setPregunta(finalPregunta);
+
 
                         Stage preguntaStage = new Stage();
                         preguntaStage.setScene(new Scene(root));
@@ -418,11 +448,15 @@ public class JuegoController {
                 Alert alert = new Alert(AlertType.INFORMATION);
                 alert.setTitle("¡FIN DEL JUEGO!");
                 alert.setHeaderText("¡Felicidades, " + jugador.getAlias() + "!");
-                alert.setContentText("¡Has llegado a la casilla central con todos los quesitos y has ganado el juego!");
+                alert.setContentText("¡Has llegado a la casilla central con todos los quesitos y has ganado el juego!\nRegresando al menú principal.");
                 alert.showAndWait();
                 jugador.getEstadisticas().incrementarPartidasJugadas();
                 jugador.getEstadisticas().incrementarPartidasGanadas();
                 gestorEstadisticas.actualizarEstadisticasJugador(jugador);
+                guardarPartidaActual();
+                if(jsonService != null) {
+                    jsonService.eliminarPartidaGuardada();
+                }
                 if (dadoController != null) {
                     dadoController.deshabilitarBotonLanzar();
                 }
@@ -437,22 +471,26 @@ public class JuegoController {
                 alert.setHeaderText(null);
                 alert.setContentText("¡Has caído en una casilla especial! Tienes otro turno para lanzar el dado.");
                 alert.showAndWait();
-                actualizarUIJugadorActual(); // Asegurarse de que la UI se actualice después del alert
+                actualizarUIJugadorActual();
             });
         }
     }
 
-
+    /**
+     * Notifica el resultado de una pregunta al controlador del juego.
+     * Actualiza las estadísticas del jugador y decide si el turno pasa o no.
+     * @param respuestaCorrecta Verdadero si la respuesta fue correcta, falso en caso contrario.
+     * @param categoriaPregunta La categoría de la pregunta respondida.
+     * @param tiempoRespuesta El tiempo que tardó el jugador en responder (en milisegundos).
+     */
     public void notificarResultadoPregunta(boolean respuestaCorrecta, String categoriaPregunta,long tiempoRespuesta) {
         Jugador jugadorEnTurnoAntes = partida.getJugadorActual();
         System.out.println("DEBUG: Notificación de resultado. Jugador actual ANTES de la lógica del turno: " + (jugadorEnTurnoAntes != null ? jugadorEnTurnoAntes.getAlias() : "NULO"));
-
 
         if (jugadorEnTurnoAntes == null) {
             System.err.println("Error: No hay jugador en turno al notificar resultado de pregunta.");
             return;
         }
-
         if (respuestaCorrecta) {
             System.out.println("¡Respuesta Correcta! " + jugadorEnTurnoAntes.getAlias() + " ha ganado un quesito de " + categoriaPregunta);
             jugadorEnTurnoAntes.addQuesito(categoriaPregunta);
@@ -460,7 +498,8 @@ public class JuegoController {
             jugadorEnTurnoAntes.getEstadisticas().incrementarPreguntasCorrectasTotal();
             jugadorEnTurnoAntes.getEstadisticas().incrementarPreguntasCorrectasPorCategoria(categoriaPregunta);
             jugadorEnTurnoAntes.getEstadisticas().añadirTiempoRespuestaCorrecta(tiempoRespuesta);
-            gestorEstadisticas.actualizarEstadisticasJugador(jugadorEnTurnoAntes); //
+            gestorEstadisticas.actualizarEstadisticasJugador(jugadorEnTurnoAntes);
+
             System.out.println("DEBUG: Respuesta CORRECTA. NO se pasa el turno.");
         } else {
             System.out.println("Respuesta Incorrecta. " + jugadorEnTurnoAntes.getAlias() + " no gana quesito. El turno pasa.");
@@ -469,23 +508,23 @@ public class JuegoController {
             partida.siguienteTurno();
             System.out.println("DEBUG: Respuesta INCORRECTA. Se pasa el turno.");
         }
+        guardarPartidaActual();
         Jugador jugadorEnTurnoDespues = partida.getJugadorActual();
         System.out.println("DEBUG: Jugador actual DESPUÉS de la lógica del turno (antes de actualizar UI): " + (jugadorEnTurnoDespues != null ? jugadorEnTurnoDespues.getAlias() : "NULO"));
-
         actualizarUIJugadorActual();
-
         Jugador jugadorEnTurnoFinal = partida.getJugadorActual();
         System.out.println("DEBUG: Jugador actual FINAL (después de actualizar UI): " + (jugadorEnTurnoFinal != null ? jugadorEnTurnoFinal.getAlias() : "NULO"));
     }
 
+    /**
+     * Maneja la acción del botón "Finalizar Partida".
+     * Actualiza las estadísticas de todos los jugadores al final de la partida y regresa al menú principal.
+     * @param event El evento de acción.
+     */
     @FXML
     private void handleFinalizarPartida(ActionEvent event) {
         System.out.println("Partida finalizada.");
-
-        // ASIGNA EL TIEMPO LÍMITE A CADA JUGADOR ANTES DE GUARDAR ESTADÍSTICAS
         for (Jugador j : partida.getJugadores()) {
-            j.setTiempoLimiteRespuesta(partida.getTiempoRespuesta()); // <-- AQUÍ, ANTES DE guardar
-
             if (!j.tieneTodosLosQuesitos(totalCategoriasParaGanar)) {
                 j.getEstadisticas().incrementarPartidasJugadas();
                 j.getEstadisticas().incrementarPartidasPerdidas();
@@ -496,21 +535,73 @@ public class JuegoController {
             }
         }
         partida.terminarPartida();
+        guardarPartidaActual();
         handleRegresar(event);
     }
 
+    /**
+     * Maneja la acción de rendición de un jugador.
+     * Actualiza las estadísticas del jugador rendido y pasa el turno o finaliza la partida.
+     * @param event El evento de acción.
+     */
     @FXML
     private void handleRendicion(ActionEvent event) {
         Jugador jugadorRendido = partida.getJugadorActual();
-        if (jugadorRendido != null) {
-            jugadorRendido.setTiempoLimiteRespuesta(partida.getTiempoRespuesta()); // <-- AQUÍ, ANTES DE guardar
+        if (jugadorRendido == null) {
+            System.err.println("No hay jugador en turno para rendirse.");
+            return;
+        }
+
+        List<Jugador> otrosJugadoresActivos = partida.getJugadores().stream()
+                .filter(j -> !j.equals(jugadorRendido))
+                .collect(Collectors.toList());
+
+        boolean jugadorRendidoGanaPorQuesitos = true;
+        if (!otrosJugadoresActivos.isEmpty()) {
+            for (Jugador otroJugador : otrosJugadoresActivos) {
+                if (jugadorRendido.getQuesitosGanadosNombres().size() <= otroJugador.getQuesitosGanadosNombres().size()) {
+                    jugadorRendidoGanaPorQuesitos = false;
+                    break;
+                }
+            }
+        } else {
+            jugadorRendidoGanaPorQuesitos = false;
+        }
+
+        if (jugadorRendidoGanaPorQuesitos) {
+            System.out.println("¡" + jugadorRendido.getAlias() + " se ha rendido y ha ganado por tener más quesitos!");
+            Platform.runLater(() -> {
+                Alert alert = new Alert(AlertType.INFORMATION);
+                alert.setTitle("¡Victoria por Rendición!");
+                alert.setHeaderText("¡Felicidades, " + jugadorRendido.getAlias() + "!");
+                alert.setContentText("Te has rendido, pero has ganado la partida por tener más quesitos que los demás jugadores activos.");
+                alert.showAndWait();
+            });
+
+            jugadorRendido.getEstadisticas().incrementarPartidasJugadas();
+            jugadorRendido.getEstadisticas().incrementarPartidasGanadas();
+            gestorEstadisticas.actualizarEstadisticasJugador(jugadorRendido);
+
+            partida.removeJugador(jugadorRendido);
+            guardarPartidaActual();
+            if (partida.getJugadores().isEmpty()) {
+                finalizarPartidaPorRendicion();
+            } else {
+                partida.siguienteTurno();
+                actualizarUIJugadorActual();
+            }
+
+        } else {
             System.out.println(jugadorRendido.getAlias() + " se ha rendido.");
+
             jugadorRendido.getEstadisticas().incrementarPartidasJugadas();
             jugadorRendido.getEstadisticas().incrementarPartidasPerdidas();
             gestorEstadisticas.actualizarEstadisticasJugador(jugadorRendido);
-            if (partida.getJugadores().size() <= 1) {
-                partida.terminarPartida();
-                handleRegresar(event);
+
+            partida.removeJugador(jugadorRendido);
+            guardarPartidaActual();
+            if (partida.getJugadores().isEmpty()) {
+                finalizarPartidaPorRendicion();
             } else {
                 partida.siguienteTurno();
                 actualizarUIJugadorActual();
@@ -518,32 +609,73 @@ public class JuegoController {
         }
     }
 
+    /**
+     * Lógica para finalizar la partida cuando no quedan jugadores después de una rendición.
+     */
+    private void finalizarPartidaPorRendicion() {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(AlertType.INFORMATION);
+            alert.setTitle("Fin de Partida por Rendición");
+            alert.setHeaderText(null);
+
+            if (partida.getJugadores().isEmpty()) {
+                alert.setContentText("Todos los jugadores se han rendido. Fin de la partida.");
+            } else {
+                System.err.println("Error: finalizarPartidaPorRendicion llamada con jugadores restantes.");
+                alert.setContentText("La partida ha terminado.");
+            }
+            alert.showAndWait();
+
+            partida.terminarPartida();
+            if (jsonService != null) {
+                jsonService.eliminarPartidaGuardada();
+            }
+            if (dadoController != null) {
+                dadoController.deshabilitarBotonLanzar();
+            }
+            Stage currentStage = (Stage) rootPane.getScene().getWindow();
+            navigateToMenuPrincipal(currentStage);
+        });
+    }
+    /**
+     * Método para guardar el estado actual de la partida en un archivo JSON.
+     * Se llama automáticamente en puntos clave del juego.
+     */
+    private void guardarPartidaActual() {
+        if (partida != null && jsonService != null) {
+            jsonService.guardarPartida(partida);
+            System.out.println("Partida guardada automáticamente.");
+        } else {
+            System.err.println("Error: No se pudo guardar la partida. Objeto partida o jsonService es nulo.");
+        }
+    }
+
+    /**
+     * Maneja la acción del botón "Regresar".
+     * Navega de vuelta a la pantalla del menú principal.
+     * @param event El evento de acción.
+     */
     @FXML
     private void handleRegresar(ActionEvent event) {
-        try {
-            Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/org/example/triviaucab1/MenuPrincipalView.fxml"));
-            Scene scene = new Scene(fxmlLoader.load());
-            stage.setScene(scene);
-            stage.setTitle("TRIVIA UCAB - Menú Principal");
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        navigateToMenuPrincipal(stage);
+    }
 
-            // Establece el modo de pantalla completa
-            stage.setFullScreen(true);
-
-            // Opcionalmente, puedes configurar qué tecla saca al usuario de pantalla completa
-            // stage.setFullScreenExitHint("Presiona ESC para salir de pantalla completa");
-
-            stage.show();
-        } catch (IOException e) {
-            // ...
-        }}
-
+    /**
+     * Maneja la acción del botón "Salir".
+     * Cierra la aplicación.
+     * @param event El evento de acción.
+     */
     @FXML
     private void handleSalir(ActionEvent event) {
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         stage.close();
     }
 
+    /**
+     * Establece las conexiones entre las casillas del tablero para formar el grafo.
+     * Este método define la estructura de movimiento en el tablero.
+     */
     private void conectarCasillasCorrectamente() {
         grafoTablero.agregarArista("1", "7");
         grafoTablero.agregarArista("7", "8");
@@ -625,14 +757,18 @@ public class JuegoController {
         grafoTablero.agregarArista("c", "62");
     }
 
+    /**
+     * Verifica las conexiones del grafo del tablero imprimiéndolas en la consola.
+     * Útil para depuración.
+     */
     private void verificarConexiones() {
         //System.out.println("Conexiones del grafo:");
         for (String id : grafoTablero.getIdsNodos()) {
             CasillaNode nodo = mapaIDaNodo.get(id);
             if (nodo != null) {
-                //System.out.print("  " + id + " -> ");
+                // System.out.print("  " + id + " -> ");
                 for (CasillaNode vecino : grafoTablero.getVecinos(nodo)) {
-                    System.out.print(vecino.getId() + " ");
+                    //System.out.print(vecino.getId() + " ");
                 }
                 //System.out.println();
             }

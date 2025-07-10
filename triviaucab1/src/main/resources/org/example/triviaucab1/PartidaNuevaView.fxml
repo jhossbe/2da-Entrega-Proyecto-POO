@@ -1,41 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" spacing="20.0" style="-fx-background-color: #2c3e50;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.triviaucab1.controller.PartidaNuevaController">
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-    </padding>
+<AnchorPane prefHeight="721.0" prefWidth="1442.0" style="-fx-background-color: #333333;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.triviaucab1.controller.PartidaNuevaController">
     <children>
-        <Label style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Selección de Jugadores" textFill="WHITE" />
-        <HBox alignment="CENTER" spacing="20.0" VBox.vgrow="ALWAYS">
+        <VBox alignment="CENTER" layoutX="471.0" layoutY="100.0" prefHeight="521.0" prefWidth="500.0" spacing="10.0" style="-fx-background-color: #444444; -fx-border-color: #555555; -fx-border-width: 2; -fx-background-radius: 10; -fx-border-radius: 10;">
+            <padding>
+                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+            </padding>
             <children>
-                <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+                <Label text="Seleccionar Jugadores" textFill="WHITE">
+                    <font>
+                        <Font name="System Bold" size="24.0" />
+                    </font>
+                </Label>
+                <HBox alignment="CENTER" spacing="10.0">
                     <children>
-                        <Label style="-fx-font-weight: bold;" text="JUGADORES DISPONIBLES" textFill="#f2efef" />
-                        <ListView fx:id="jugadoresDisponiblesListView" prefHeight="200.0" prefWidth="200.0" />
-                        <HBox alignment="CENTER" spacing="10.0">
-                            <Button onAction="#handleAddPlayer" text="Añadir &gt;&gt;" />
-                            <Button onAction="#handleRemovePlayer" text="&lt;&lt; Quitar" />
-                        </HBox>
+                        <TextField fx:id="newPlayerEmailField" promptText="Email del nuevo jugador" HBox.hgrow="ALWAYS" />
+                        <TextField fx:id="newPlayerAliasField" promptText="Alias del nuevo jugador" HBox.hgrow="ALWAYS" />
+                        <Button mnemonicParsing="false" onAction="#handleAddPlayer" text="Añadir" style="-fx-background-color: #5cb85c; -fx-background-radius: 5; -fx-font-weight: bold; -fx-cursor: hand;" textFill="WHITE" />
                     </children>
-                </VBox>
-                <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+                </HBox>
+                <HBox alignment="CENTER" spacing="20.0" VBox.vgrow="ALWAYS">
                     <children>
-                        <Label style="-fx-font-weight: bold;" text="JUGADORES SELECCIONADOS" textFill="WHITE" />
-                        <ListView fx:id="jugadoresSeleccionadosListView" prefHeight="200.0" prefWidth="200.0" />
+                        <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+                            <children>
+                                <Label style="-fx-font-weight: bold;" text="JUGADORES DISPONIBLES" textFill="#f2efef" />
+                                <ListView fx:id="jugadoresDisponiblesListView" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
+                            </children>
+                        </VBox>
+                        <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+                            <children>
+                                <Label style="-fx-font-weight: bold;" text="JUGADORES SELECCIONADOS" textFill="WHITE" />
+                                <ListView fx:id="jugadoresSeleccionadosListView" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
+                            </children>
+                        </VBox>
                     </children>
-                </VBox>
+                </HBox>
+                <HBox alignment="CENTER" spacing="10.0">
+                    <children>
+                        <Button mnemonicParsing="false" onAction="#handleSelectPlayer" text="Seleccionar &gt;&gt;" style="-fx-background-color: #5bc0de; -fx-background-radius: 5; -fx-font-weight: bold; -fx-cursor: hand;" textFill="WHITE" />
+                        <Button mnemonicParsing="false" onAction="#handleDeselectPlayer" text="&lt;&lt; Deseleccionar" style="-fx-background-color: #f0ad4e; -fx-background-radius: 5; -fx-font-weight: bold; -fx-cursor: hand;" textFill="WHITE" />
+                    </children>
+                </HBox>
+                <HBox alignment="CENTER" spacing="10.0">
+                    <Label text="Tiempo de respuesta (segundos):" textFill="WHITE" />
+                    <TextField fx:id="tiempoRespuestaField" promptText="Ej: 10" prefWidth="80.0" />
+                </HBox>
+                <Button mnemonicParsing="false" onAction="#handleIniciarPartida" text="Iniciar Partida" style="-fx-background-color: #5cb85c; -fx-background-radius: 5; -fx-font-weight: bold; -fx-cursor: hand;" textFill="WHITE" />
+                <Button mnemonicParsing="false" onAction="#handleCancelar" text="Cancelar" style="-fx-background-color: #d9534f; -fx-background-radius: 5; -fx-font-weight: bold; -fx-cursor: hand;" textFill="WHITE" />
             </children>
-        </HBox>
-        <HBox alignment="CENTER" spacing="20.0">
-            <children>
-                <Button mnemonicParsing="false" onAction="#handleJugar" prefHeight="40.0" prefWidth="100.0" text="Jugar" />
-                <Button mnemonicParsing="false" onAction="#handleRegresar" prefHeight="40.0" prefWidth="100.0" text="Regresar" />
-                <Button mnemonicParsing="false" onAction="#handleSalir" prefHeight="40.0" prefWidth="100.0" text="Salir" />
-            </children>
-        </HBox>
+        </VBox>
     </children>
-</VBox>
+</AnchorPane>

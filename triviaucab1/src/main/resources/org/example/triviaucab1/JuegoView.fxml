@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.canvas.Canvas?> <?import javafx.scene.control.*?>
+<?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.*?>
@@ -14,6 +14,8 @@
 
     <children>
         <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#5c6369" height="1110.0" layoutX="-26.0" layoutY="-22.0" stroke="#615d5d" strokeType="INSIDE" width="1697.0" />
+
+        <!-- Canvas para la ficha del jugador en el panel lateral (donde se ven los quesitos) -->
         <Canvas fx:id="fichaJugadorCanvas" layoutX="1000.0" layoutY="150.0" width="150.0" height="150.0" />
 
         <Label fx:id="jugadorEnTurnoLabel" layoutX="1000.0" layoutY="50.0" text="Jugador Actual: " textFill="WHITE">
@@ -107,7 +109,8 @@
         <Rectangle id="c" fx:id="casillaCentral" arcHeight="5.0" arcWidth="5.0" height="39.0" layoutX="592.0" layoutY="306.0" stroke="BLACK" strokeType="INSIDE" width="39.0" style="-fx-cursor: hand;" />
 
         <!-- Canvas para la ficha central en el tablero -->
-        <Canvas fx:id="fichaEnTableroCanvas" layoutX="592.0" layoutY="306.0" width="39.0" height="39.0" />
+        <!-- Asegúrate de que este Canvas está en la posición correcta y es lo suficientemente grande para tu ficha -->
+        <Canvas fx:id="fichaEnTableroCanvas" layoutX="592.0" layoutY="306.0" width="39.0" height="39.0" mouseTransparent="true" visible="false" />
 
         <!-- Panel de leyenda -->
         <Rectangle id="leyendaBackground" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="312.0" layoutX="11.0" layoutY="468.0" stroke="BLACK" strokeType="INSIDE" width="249.0" />

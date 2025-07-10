@@ -23,11 +23,8 @@ public class FichaBase implements Ficha {
 
     @Override
     public void dibujar(GraphicsContext gc, double x, double y, double radius) {
-        // Dibuja el círculo base blanco
         gc.setFill(baseColor);
         gc.fillOval(x - radius, y - radius, radius * 2, radius * 2);
-
-        // Dibuja los bordes de los segmentos (la "torta")
         dibujarBordes(gc, x, y, radius);
     }
 

@@ -1,7 +1,7 @@
 package org.example.triviaucab1.module;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty; // Mantener por si se usa en otros constructores o setters que no vemos
 
 import org.example.triviaucab1.fichadecorator.Ficha;
 import org.example.triviaucab1.fichadecorator.FichaBase;
@@ -12,7 +12,7 @@ import org.example.triviaucab1.fichadecorator.PuntoEntretenimiento;
 import org.example.triviaucab1.fichadecorator.PuntoGeografia;
 import org.example.triviaucab1.fichadecorator.PuntoHistoria;
 
-import javafx.scene.paint.Color; // Importar Color para FichaBase
+import javafx.scene.paint.Color;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -27,42 +27,80 @@ public class Jugador {
     private String alias;
     private Set<String> quesitosGanados;
     private EstadisticasJugador estadisticas;
-    private int tiempoLimiteRespuesta;
     private String casillaActualId;
-    @JsonIgnore
+    @JsonIgnore // Asegura que Jackson no intente serializar/deserializar este campo directamente
     private Ficha fichaVisual;
 
+    // Este campo existe en tu JSON de estadísticas, pero no lo necesitas en tu modelo actual.
+    // Lo declaramos y lo marcamos con @JsonIgnore para que Jackson lo ignore al deserializar.
+    @JsonIgnore // <-- ¡CRUCIAL! Ignora este campo al deserializar
+    private int tiempoLimiteRespuesta; // <-- ¡NUEVO! Añadido para que Jackson no falle si lo encuentra en el JSON
+
+    /**
+     * Constructor por defecto. Jackson lo usará al deserializar el JSON.
+     * Es crucial que aquí se inicialicen TODOS los campos que no vienen del JSON
+     * o que Jackson no puede inicializar por sí mismo (como los Sets y objetos complejos).
+     */
     public Jugador() {
+        System.out.println("DEBUG: Constructor por defecto de Jugador llamado."); // Mensaje de depuración
         this.quesitosGanados = new HashSet<>();
-        this.estadisticas = new EstadisticasJugador();
+        this.estadisticas = new EstadisticasJugador(); // Asegura que EstadisticasJugador siempre esté inicializado
         this.casillaActualId = "c";
-        this.fichaVisual = new FichaBase(Color.WHITE);
+        this.fichaVisual = new FichaBase(Color.WHITE); // Inicializa la ficha visual
+        this.tiempoLimiteRespuesta = 0; // Inicializa el campo ignorado
     }
 
+    /**
+     * Constructor para crear un Jugador con email y alias.
+     * Llama al constructor por defecto para inicializar los otros campos.
+     */
     public Jugador(String email, String alias) {
-        this();
+        this(); // Llama al constructor por defecto para inicializar quesitosGanados, estadisticas, etc.
         this.email = email;
         this.alias = alias;
     }
 
-    public int getTiempoLimiteRespuesta() {
-        return tiempoLimiteRespuesta;
+    // --- ¡IMPORTANTE! NO DEBE HABER OTROS CONSTRUCTORES CON @JsonProperty ---
+    // Si tenías un constructor como este que causaba problemas, asegúrate de que esté eliminado:
+    /*
+    public Jugador(
+            @JsonProperty("email") String email,
+            @JsonProperty("alias") String alias,
+            @JsonProperty("quesitosGanadosNombres") List<String> quesitosIniciales,
+            @JsonProperty("estadisticas") EstadisticasJugador estadisticas,
+            @JsonProperty("casillaActualId") String casillaActualId) {
+        this();
+        this.email = email;
+        this.alias = alias;
+        this.estadisticas = estadisticas;
+        this.casillaActualId = casillaActualId;
+        setQuesitosGanadosNombres(quesitosIniciales);
     }
-    public void setTiempoLimiteRespuesta(int tiempoLimiteRespuesta) {
-        this.tiempoLimiteRespuesta = tiempoLimiteRespuesta;
-    }
+    */
+    // --- FIN DE LA NOTA IMPORTANTE ---
 
+
+    // --- Getters y Setters ---
     public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
     public String getAlias() { return alias; }
-    public EstadisticasJugador getEstadisticas() { return estadisticas; }
+    public void setAlias(String alias) { this.alias = alias; }
+
+    public EstadisticasJugador getEstadisticas() {
+        return estadisticas;
+    }
+
+    public void setEstadisticas(EstadisticasJugador estadisticas) {
+        this.estadisticas = estadisticas;
+    }
+
     public String getCasillaActualId() { return casillaActualId; }
-    public Ficha getFichaVisual() { return fichaVisual; } // Getter para la ficha visual
-
-    public void setEstadisticas(EstadisticasJugador estadisticas) { this.estadisticas = estadisticas; }
     public void setCasillaActualId(String casillaActualId) { this.casillaActualId = casillaActualId; }
-    public void setFichaVisual(Ficha fichaVisual) { this.fichaVisual = fichaVisual; } // Setter para la ficha visual
 
-    // Getter para Jackson al guardar en JSON
+    public Ficha getFichaVisual() { return fichaVisual; }
+    public void setFichaVisual(Ficha fichaVisual) { this.fichaVisual = fichaVisual; }
+
+    // Getter para Jackson al guardar en JSON o para lógica de juego
     public List<String> getQuesitosGanadosNombres() {
         if (this.quesitosGanados != null) {
             return new ArrayList<>(this.quesitosGanados);
@@ -72,7 +110,6 @@ public class Jugador {
 
     // Setter para Jackson al cargar del JSON. Dispara la reconstrucción de la ficha.
     public void setQuesitosGanadosNombres(List<String> quesitosGanadosNombres) {
-        //System.out.println("DEBUG (Jugador): setQuesitosGanadosNombres llamado con: " + quesitosGanadosNombres);
         if (this.quesitosGanados == null) {
             this.quesitosGanados = new HashSet<>();
         }
@@ -80,47 +117,38 @@ public class Jugador {
         if (quesitosGanadosNombres != null) {
             this.quesitosGanados.addAll(quesitosGanadosNombres);
         }
-        //System.out.println("DEBUG (Jugador): Quesitos internos después de setear: " + this.quesitosGanados);
         reconstruirFichaVisual();
     }
 
 
-    // Método para añadir un quesito (usado cuando el jugador lo gana)
+    // --- Métodos de Lógica de Juego ---
     public void addQuesito(String categoria) {
-        if (this.quesitosGanados.add(categoria)) { // Si se añade un nuevo quesito (Set.add() retorna true)
+        if (this.quesitosGanados.add(categoria)) {
             System.out.println(getAlias() + " ha ganado el quesito de " + categoria + ". Total de quesitos únicos: " + quesitosGanados.size());
-            reconstruirFichaVisual(); // Reconstruye la ficha visual para mostrar el nuevo quesito
+            reconstruirFichaVisual();
         } else {
             System.out.println(getAlias() + " ya tenía el quesito de " + categoria + ". No se añade de nuevo.");
         }
     }
 
-    // Método para verificar si el jugador tiene todos los quesitos necesarios
     public boolean tieneTodosLosQuesitos(int totalCategoriasRequeridas) {
         if (this.quesitosGanados == null) {
             return false;
         }
-        //System.out.println("DEBUG (Jugador): Quesitos ganados (" + quesitosGanados.size() + ") vs Requeridos (" + totalCategoriasRequeridas + ")");
-        return quesitosGanados.size() >= totalCategoriasRequeridas;
+        return this.quesitosGanados.size() >= totalCategoriasRequeridas;
     }
 
-    // Este método es crucial para construir la representación visual de la ficha
     private void reconstruirFichaVisual() {
-        //System.out.println("DEBUG (Jugador): Reconstruyendo ficha visual para " + getAlias());
-        // Siempre empieza con una FichaBase limpia
-        this.fichaVisual = new FichaBase(Color.WHITE); // Usa el color de prueba para la base
+        this.fichaVisual = new FichaBase(Color.WHITE);
 
-        // Aplica un decorador por cada quesito ganado
         if (quesitosGanados != null) {
             for (String categoria : quesitosGanados) {
-                //System.out.println("DEBUG (Jugador): Aplicando decorador para categoría: " + categoria);
                 this.fichaVisual = aplicarDecoradorQuesito(this.fichaVisual, categoria);
             }
         }
     }
 
     private Ficha aplicarDecoradorQuesito(Ficha fichaActual, String categoria) {
-
         switch (categoria) {
             case "Geografía": return new PuntoGeografia(fichaActual);
             case "Historia": return new PuntoHistoria(fichaActual);
@@ -134,9 +162,10 @@ public class Jugador {
         }
     }
 
+    // --- Métodos de Utilidad ---
     @Override
     public String toString() {
-        return alias;
+        return alias; // Esto es lo que se mostrará en el ListView
     }
 
     @Override

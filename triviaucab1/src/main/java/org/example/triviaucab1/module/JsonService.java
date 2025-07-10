@@ -2,109 +2,165 @@ package org.example.triviaucab1.module;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule; // Importa esta clase
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
-import java.util.Arrays;
-import java.util.ArrayList;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
-
+/**
+ * Servicio para guardar y cargar objetos de partida y estadísticas de jugadores en formato JSON.
+ * Utiliza la librería Jackson para la serialización y deserialización.
+ */
 public class JsonService {
-
-    // Define la ruta del archivo de jugadores para lectura de recursos (dentro del JAR)
-    private static final String JUGADORES_RESOURCE_PATH = "/jugadores.json";
-    private static final String JUGADORES_FILE_NAME = "jugadores.json"; // Para guardar
-    private static final String PARTIDA_FILE_NAME = "partida.json"; // Para guardar/cargar partida
-
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
+    private static final String PARTIDAS_FILE = "partidas_guardadas.json";
+    private static final String JUGADORES_FILE = "jugadores.json"; // Asumiendo que existe para cargar jugadores
+    private static final String ESTADISTICAS_FILE = "estadisticasJugadores.json"; // Asumiendo que existe
 
     public JsonService() {
         objectMapper = new ObjectMapper();
+        // Registra el módulo para soportar tipos de fecha y hora de Java 8 (LocalDateTime, etc.)
+        objectMapper.registerModule(new JavaTimeModule());
+        // Opcional: Configura para escribir fechas como cadenas ISO-8601 en lugar de timestamps
+        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        // Opcional: Habilita la indentación para que el JSON sea más legible
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
     }
 
     /**
-     * Lee la lista de jugadores desde el archivo JSON de recursos.
-     * Asume que jugadores.json está en src/main/resources/ y solo contiene email y alias.
-     * Los campos como EstadisticasJugador se inicializarán por el constructor de Jugador.
-     * @return Una lista de objetos Jugador.
+     * Guarda el estado actual de la partida en un archivo JSON.
+     *
+     * @param partida El objeto Partida a guardar.
      */
-    public List<Jugador> cargarJugadores() {
-        List<Jugador> jugadores = new ArrayList<>();
-        try (InputStream is = getClass().getResourceAsStream(JUGADORES_RESOURCE_PATH)) {
-            if (is == null) {
-                System.err.println("Error: Archivo de jugadores '" + JUGADORES_RESOURCE_PATH + "' no encontrado en los recursos. Retornando lista vacía.");
-                // Si el recurso no se encuentra (ej. en un entorno de desarrollo donde no está copiado),
-                // podrías considerar una ruta alternativa para desarrollo o simplemente retornar vacío.
-                return new ArrayList<>();
+    public void guardarPartida(Partida partida) {
+        try {
+            File file = new File(PARTIDAS_FILE);
+            if (!file.exists()) {
+                file.createNewFile(); // Crea el archivo si no existe
             }
-
-            // Usar TypeReference es la forma robusta de deserializar listas de objetos complejos con Jackson
-            jugadores = objectMapper.readValue(is, new TypeReference<List<Jugador>>() {});
-            System.out.println("Jugadores cargados exitosamente desde " + JUGADORES_RESOURCE_PATH);
+            objectMapper.writeValue(file, partida);
+            System.out.println("Partida guardada exitosamente en " + PARTIDAS_FILE);
         } catch (IOException e) {
-            System.err.println("Error al cargar jugadores desde JSON: " + e.getMessage());
+            System.err.println("Error al guardar partida en JSON: " + e.getMessage());
             e.printStackTrace();
         }
-        return jugadores;
     }
 
     /**
-     * Guarda la lista de jugadores en el archivo JSON.
-     * Este método guardará el archivo en el directorio donde se ejecute el JAR o en la raíz del proyecto.
-     * Ten en cuenta que si el `jugadores.json` de recursos es estático, este método solo
-     * se usaría si los jugadores pueden ser creados/modificados y guardados por el usuario.
-     * @param jugadores La lista de jugadores a guardar.
+     * Carga el estado de una partida desde un archivo JSON.
+     *
+     * @return El objeto Partida cargado, o null si no se pudo cargar.
+     */
+    public Partida cargarPartida() {
+        File file = new File(PARTIDAS_FILE);
+        if (file.exists() && file.length() > 0) {
+            try {
+                return objectMapper.readValue(file, Partida.class);
+            } catch (IOException e) {
+                System.err.println("Error al cargar partida desde JSON: " + e.getMessage());
+                e.printStackTrace();
+                return null;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Carga la lista de jugadores desde un archivo JSON.
+     *
+     * @return Una lista de objetos Jugador.
+     */
+    public List<Jugador> cargarJugadores() {
+        File file = new File(JUGADORES_FILE);
+        if (file.exists() && file.length() > 0) {
+            try {
+                return objectMapper.readValue(file, objectMapper.getTypeFactory().constructCollectionType(List.class, Jugador.class));
+            } catch (IOException e) {
+                System.err.println("Error al cargar jugadores desde JSON: " + e.getMessage());
+                e.printStackTrace();
+                return Collections.emptyList();
+            }
+        }
+        return Collections.emptyList();
+    }
+
+    /**
+     * Guarda la lista de jugadores en un archivo JSON.
+     *
+     * @param jugadores La lista de objetos Jugador a guardar.
      */
     public void guardarJugadores(List<Jugador> jugadores) {
-        try (OutputStream os = Files.newOutputStream(Paths.get(JUGADORES_FILE_NAME))) {
-            objectMapper.writeValue(os, jugadores);
-            System.out.println("Jugadores guardados en " + JUGADORES_FILE_NAME);
+        try {
+            File file = new File(JUGADORES_FILE);
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            objectMapper.writeValue(file, jugadores);
+            System.out.println("Jugadores guardados exitosamente en " + JUGADORES_FILE);
         } catch (IOException e) {
             System.err.println("Error al guardar jugadores en JSON: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    // Los métodos cargarPartida() y guardarPartida() pueden permanecer como están
-    // ya que probablemente Partida.json se guarda y carga en el directorio de trabajo.
+    /**
+     * Carga las estadísticas globales de los jugadores desde un archivo JSON.
+     *
+     * @return Una lista de objetos Jugador con estadísticas globales.
+     */
+    public List<Jugador> cargarEstadisticasJugadoresGlobales() {
+        File file = new File(ESTADISTICAS_FILE);
+        if (file.exists() && file.length() > 0) {
+            try {
+                return objectMapper.readValue(file, objectMapper.getTypeFactory().constructCollectionType(List.class, Jugador.class));
+            } catch (IOException e) {
+                System.err.println("Error al cargar estadísticas globales desde JSON: " + e.getMessage());
+                e.printStackTrace();
+                return Collections.emptyList();
+            }
+        }
+        return Collections.emptyList();
+    }
 
     /**
-     * Carga el estado de la última partida guardada.
-     * @return El objeto Partida cargado.
+     * Guarda las estadísticas globales de los jugadores en un archivo JSON.
+     *
+     * @param jugadoresConEstadisticas La lista de objetos Jugador con estadísticas a guardar.
      */
-    public Partida cargarPartida() {
+    public void guardarEstadisticasJugadoresGlobales(List<Jugador> jugadoresConEstadisticas) {
         try {
-            File file = new File(PARTIDA_FILE_NAME);
+            File file = new File(ESTADISTICAS_FILE);
             if (!file.exists()) {
-                System.out.println("Archivo de partida no encontrado, retornando nueva partida.");
-                return new Partida();
+                file.createNewFile();
             }
-            return objectMapper.readValue(file, Partida.class);
+            objectMapper.writeValue(file, jugadoresConEstadisticas);
+            System.out.println("Estadísticas globales guardadas exitosamente en " + ESTADISTICAS_FILE);
         } catch (IOException e) {
-            System.err.println("Error al cargar partida desde JSON: " + e.getMessage());
+            System.err.println("Error al guardar estadísticas globales en JSON: " + e.getMessage());
             e.printStackTrace();
-            return new Partida();
         }
     }
 
     /**
-     * Guarda el estado actual de la partida.
-     * @param partida El objeto Partida a guardar.
+     * Elimina el archivo de la partida guardada.
+     * Se llama cuando una partida finaliza (victoria, rendición, etc.) para que no se pueda cargar de nuevo.
      */
-    public void guardarPartida(Partida partida) {
+    public void eliminarPartidaGuardada() {
         try {
-            objectMapper.writeValue(new File(PARTIDA_FILE_NAME), partida);
-            System.out.println("Partida guardada en " + PARTIDA_FILE_NAME);
-        } catch (IOException e) {
-            System.err.println("Error al guardar partida en JSON: " + e.getMessage());
+            File file = new File(PARTIDAS_FILE);
+            if (file.exists()) {
+                if (file.delete()) {
+                    System.out.println("Archivo de partida '" + PARTIDAS_FILE + "' eliminado exitosamente.");
+                } else {
+                    System.err.println("Error: No se pudo eliminar el archivo de partida '" + PARTIDAS_FILE + "'.");
+                }
+            } else {
+                System.out.println("Advertencia: No se encontró el archivo de partida '" + PARTIDAS_FILE + "' para eliminar.");
+            }
+        } catch (SecurityException e) {
+            System.err.println("Error de seguridad al intentar eliminar el archivo de partida: " + e.getMessage());
             e.printStackTrace();
         }
     }

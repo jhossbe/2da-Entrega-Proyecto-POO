@@ -39,7 +39,7 @@ public class DadoController {
 
         int resultado = new Random().nextInt(6) + 1;
         diceResultLabel.setText(String.valueOf(resultado));
-        System.out.println("🎲 El dado lanzó: " + resultado);
+        //System.out.println(" El dado lanzó: " + resultado);
 
         if (juegoController != null) {
             juegoController.lanzarYMostrarMovimientos(resultado);
@@ -55,7 +55,7 @@ public class DadoController {
     public void habilitarBotonLanzar() {
         if (diceButton != null) {
             diceButton.setDisable(false);
-            System.out.println("✅ Botón de dado HABILITADO.");
+            System.out.println("Botón de dado HABILITADO.");
         }
     }
 

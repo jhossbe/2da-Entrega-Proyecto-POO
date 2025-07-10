@@ -1,116 +1,94 @@
 [ {
-  "email" : "jugador2@example.com",
-  "alias" : "Jugador2",
-  "estadisticas" : {
-    "partidasJugadas" : 10,
-    "partidasGanadas" : 0,
-    "partidasPerdidas" : 10,
-    "preguntasCorrectasTotal" : 1,
-    "preguntasIncorrectas" : 9,
-    "preguntasCorrectasPorCategoria" : {
-      "Deportes" : 1
-    },
-    "tiempoTotalRespuestasCorrectas" : 19915
-  },
-  "tiempoLimiteRespuesta" : 0,
-  "casillaActualId" : "48",
-  "quesitosGanadosNombres" : [ "Deportes" ]
-}, {
-  "email" : "jugador1@example.com",
-  "alias" : "Jugador1",
-  "estadisticas" : {
-    "partidasJugadas" : 11,
-    "partidasGanadas" : 0,
-    "partidasPerdidas" : 11,
-    "preguntasCorrectasTotal" : 4,
-    "preguntasIncorrectas" : 16,
-    "preguntasCorrectasPorCategoria" : {
-      "Arte y Literatura" : 2,
-      "Entretenimiento" : 1,
-      "Ciencia" : 1
-    },
-    "tiempoTotalRespuestasCorrectas" : 111747
-  },
-  "tiempoLimiteRespuesta" : 0,
-  "casillaActualId" : "2",
-  "quesitosGanadosNombres" : [ "Arte y Literatura", "Entretenimiento", "Ciencia" ]
-}, {
-  "email" : "jugador4@example.com",
-  "alias" : "Jugador4",
-  "estadisticas" : {
-    "partidasJugadas" : 7,
-    "partidasGanadas" : 0,
-    "partidasPerdidas" : 7,
-    "preguntasCorrectasTotal" : 1,
-    "preguntasIncorrectas" : 10,
-    "preguntasCorrectasPorCategoria" : {
-      "Geografía" : 1
-    },
-    "tiempoTotalRespuestasCorrectas" : 8165
-  },
-  "tiempoLimiteRespuesta" : 0,
-  "casillaActualId" : "16",
-  "quesitosGanadosNombres" : [ "Geografía" ]
-}, {
-  "email" : "jugador3@example.com",
-  "alias" : "Jugador3",
-  "estadisticas" : {
-    "partidasJugadas" : 8,
-    "partidasGanadas" : 0,
-    "partidasPerdidas" : 8,
-    "preguntasCorrectasTotal" : 0,
-    "preguntasIncorrectas" : 7,
-    "preguntasCorrectasPorCategoria" : { },
-    "tiempoTotalRespuestasCorrectas" : 0
-  },
-  "tiempoLimiteRespuesta" : 0,
-  "casillaActualId" : "47",
-  "quesitosGanadosNombres" : [ ]
-}, {
   "email" : "jugador6@example.com",
   "alias" : "Jugador6",
   "estadisticas" : {
-    "partidasJugadas" : 10,
+    "partidasJugadas" : 0,
     "partidasGanadas" : 0,
-    "partidasPerdidas" : 10,
-    "preguntasCorrectasTotal" : 1,
-    "preguntasIncorrectas" : 10,
-    "preguntasCorrectasPorCategoria" : {
-      "Entretenimiento" : 1
-    },
-    "tiempoTotalRespuestasCorrectas" : 4659
-  },
-  "tiempoLimiteRespuesta" : 0,
-  "casillaActualId" : "41",
-  "quesitosGanadosNombres" : [ "Entretenimiento" ]
-}, {
-  "email" : "jugador5@example.com",
-  "alias" : "Jugador5",
-  "estadisticas" : {
-    "partidasJugadas" : 8,
-    "partidasGanadas" : 0,
-    "partidasPerdidas" : 8,
+    "partidasPerdidas" : 0,
     "preguntasCorrectasTotal" : 0,
-    "preguntasIncorrectas" : 9,
+    "preguntasIncorrectas" : 8,
     "preguntasCorrectasPorCategoria" : { },
     "tiempoTotalRespuestasCorrectas" : 0
   },
-  "tiempoLimiteRespuesta" : 0,
-  "casillaActualId" : "49",
+  "casillaActualId" : "41",
   "quesitosGanadosNombres" : [ ]
 }, {
   "email" : "jugador7@example.com",
   "alias" : "Jugador7",
   "estadisticas" : {
-    "partidasJugadas" : 3,
+    "partidasJugadas" : 1,
+    "partidasGanadas" : 1,
+    "partidasPerdidas" : 0,
+    "preguntasCorrectasTotal" : 19,
+    "preguntasIncorrectas" : 5,
+    "preguntasCorrectasPorCategoria" : {
+      "Arte y Literatura" : 2,
+      "Entretenimiento" : 4,
+      "Geografía" : 4,
+      "Historia" : 6,
+      "Deportes" : 1,
+      "Ciencia" : 2
+    },
+    "tiempoTotalRespuestasCorrectas" : 356000
+  },
+  "casillaActualId" : "c",
+  "quesitosGanadosNombres" : [ "Arte y Literatura", "Deportes", "Entretenimiento", "Geografía", "Historia", "Ciencia" ]
+}, {
+  "email" : "jugador5@example.com",
+  "alias" : "Jugador5",
+  "estadisticas" : {
+    "partidasJugadas" : 0,
     "partidasGanadas" : 0,
-    "partidasPerdidas" : 3,
+    "partidasPerdidas" : 0,
+    "preguntasCorrectasTotal" : 0,
+    "preguntasIncorrectas" : 5,
+    "preguntasCorrectasPorCategoria" : { },
+    "tiempoTotalRespuestasCorrectas" : 0
+  },
+  "casillaActualId" : "45",
+  "quesitosGanadosNombres" : [ ]
+}, {
+  "email" : "jugador2@example.com",
+  "alias" : "Jugador2",
+  "estadisticas" : {
+    "partidasJugadas" : 0,
+    "partidasGanadas" : 0,
+    "partidasPerdidas" : 0,
     "preguntasCorrectasTotal" : 0,
     "preguntasIncorrectas" : 1,
     "preguntasCorrectasPorCategoria" : { },
     "tiempoTotalRespuestasCorrectas" : 0
   },
-  "tiempoLimiteRespuesta" : 0,
-  "casillaActualId" : "2",
+  "casillaActualId" : "48",
   "quesitosGanadosNombres" : [ ]
+}, {
+  "email" : "jugador3@example.com",
+  "alias" : "Jugador3",
+  "estadisticas" : {
+    "partidasJugadas" : 0,
+    "partidasGanadas" : 0,
+    "partidasPerdidas" : 0,
+    "preguntasCorrectasTotal" : 0,
+    "preguntasIncorrectas" : 1,
+    "preguntasCorrectasPorCategoria" : { },
+    "tiempoTotalRespuestasCorrectas" : 0
+  },
+  "casillaActualId" : "57",
+  "quesitosGanadosNombres" : [ ]
+}, {
+  "email" : "jugador4@example.com",
+  "alias" : "Jugador4",
+  "estadisticas" : {
+    "partidasJugadas" : 1,
+    "partidasGanadas" : 1,
+    "partidasPerdidas" : 0,
+    "preguntasCorrectasTotal" : 1,
+    "preguntasIncorrectas" : 1,
+    "preguntasCorrectasPorCategoria" : {
+      "Deportes" : 1
+    },
+    "tiempoTotalRespuestasCorrectas" : 11000
+  },
+  "casillaActualId" : "51",
+  "quesitosGanadosNombres" : [ "Deportes" ]
 } ]

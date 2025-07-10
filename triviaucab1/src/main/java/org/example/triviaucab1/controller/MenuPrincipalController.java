@@ -43,9 +43,9 @@ public class MenuPrincipalController {
      */
     @FXML
     private void handlePartidaGuardada(ActionEvent event) {
-        System.out.println("Botón 'Partida guardada' presionado. Cargando partida.");
+        System.out.println("Botón 'Partida guardada' presionado. Navegando a la vista de carga.");
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/triviaucab1/PartidaGuardadaView.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/org/example/triviaucab1/PartidaGuardadaView.fxml"));
             Scene scene = new Scene(fxmlLoader.load());
             Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
             stage.setScene(scene);

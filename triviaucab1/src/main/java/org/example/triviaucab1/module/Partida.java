@@ -1,86 +1,112 @@
 package org.example.triviaucab1.module;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.time.Duration;
-import java.util.Collections; // <--- AÑADE ESTA IMPORTACIÓN
-import java.util.Random;      // <--- AÑADE ESTA IMPORTACIÓN
+import java.util.Random;
 
+/**
+ * Clase que representa el estado de una partida de trivia.
+ * Contiene la información de los jugadores, el turno actual,
+ * el tiempo de respuesta, y el estado del juego.
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Partida {
+
     private List<Jugador> jugadores;
-    private Tablero tablero; // Asumiendo que Tablero es serializable o no se guarda directamente
-    private int jugadorActualIndex; // Nombre consistente: jugadorActualIndex
-    // Recomendación: Cambiado a Map<String, Integer> para una serialización/deserialización robusta
-    private Map<String, Integer> posiciones; // Map<ID Único del Jugador (ej. email), Posición>
+    @JsonIgnore
+    private transient Tablero tablero;
+    private int jugadorActualIndex;
+    private Map<String, String> posiciones;
     private LocalDateTime fechaInicio;
     private LocalDateTime fechaFin;
     private boolean partidaTerminada;
-    private int tiempoRespuesta = 30; // Valor por defecto
     private long tiempoTotalSegundos;
-    private Random random; // <--- AÑADE ESTE CAMPO
+    @JsonIgnore
+    private transient Random random;
+    private long tiempoRespuesta;
 
+    /**
+     * Constructor por defecto de la clase Partida.
+     * Inicializa las listas y mapas necesarios, y establece valores por defecto.
+     * Jackson lo usará al deserializar el JSON.
+     */
     public Partida() {
         this.jugadores = new ArrayList<>();
         this.tablero = new Tablero();
-        // Inicializa el mapa de posiciones con clave String
         this.posiciones = new HashMap<>();
         this.jugadorActualIndex = 0;
         this.fechaInicio = LocalDateTime.now();
         this.partidaTerminada = false;
         this.tiempoTotalSegundos = 0;
-        this.random = new Random(); // <--- INICIALIZA Random
+        this.random = new Random();
+        this.tiempoRespuesta = 15;
     }
 
-    public int getTiempoRespuesta() {
-        return tiempoRespuesta;
-    }
-
-    public void setTiempoRespuesta(int tiempoRespuesta) {
+    /**
+     * Inicializa una nueva partida con los jugadores seleccionados y el tiempo de respuesta.
+     * Este método se usa para comenzar una partida desde cero.
+     * @param jugadoresSeleccionados La lista de jugadores que participarán en la partida.
+     * @param tiempoRespuesta El tiempo límite en segundos para responder cada pregunta.
+     */
+    public void iniciar(List<Jugador> jugadoresSeleccionados, long tiempoRespuesta) {
+        if (jugadoresSeleccionados == null || jugadoresSeleccionados.isEmpty()) {
+            throw new IllegalArgumentException("La lista de jugadores no puede ser nula o vacía.");
+        }
+        this.jugadores = new ArrayList<>(jugadoresSeleccionados);
         this.tiempoRespuesta = tiempoRespuesta;
-    }
+        this.posiciones.clear();
+        for (Jugador jugador : this.jugadores) {
+            jugador.setQuesitosGanadosNombres(new ArrayList<>());
+            jugador.setCasillaActualId("c");
 
-    // El método `iniciar` debería encargarse de las posiciones iniciales y la configuración
-    public void iniciar(List<Jugador> jugadoresSeleccionados) {
-        this.jugadores = jugadoresSeleccionados;
-        // Llena el mapa de posiciones usando el ID único del jugador (ej. email o alias)
-        this.posiciones.clear(); // Limpia cualquier posición anterior
-        for (Jugador jugador : jugadoresSeleccionados) {
-            // Usando el email como clave única para el seguimiento de la posición
             if (jugador.getEmail() != null && !jugador.getEmail().isEmpty()) {
-                this.posiciones.put(jugador.getEmail(), 0); // Todos los jugadores empiezan en la posición 0 (o equivalente a 'c')
+                this.posiciones.put(jugador.getEmail(), "c");
             } else {
-                System.err.println("Advertencia: El jugador " + jugador.getAlias() + " no tiene email para el seguimiento de posición.");
-                // Alternativa: usa el alias si el email no está disponible, pero asegúrate de que el alias sea único.
-                this.posiciones.put(jugador.getAlias(), 0);
+                System.err.println("Advertencia: El jugador " + jugador.getAlias() + " no tiene email. Usando alias como clave de posición.");
+                this.posiciones.put(jugador.getAlias(), "c");
             }
         }
-        // Importante: Aleatoriza el orden aquí o en el método que llama (JuegoController.setPartida)
-        establecerOrdenAleatorio(); // <--- Llama para aleatorizar el orden
+        establecerOrdenAleatorio();
         this.partidaTerminada = false;
         this.fechaInicio = LocalDateTime.now();
         this.tiempoTotalSegundos = 0;
         System.out.println("Partida iniciada con " + jugadores.size() + " jugadores.");
+        System.out.println("Tiempo de respuesta configurado: " + tiempoRespuesta + " segundos.");
     }
 
-    // Nuevo: Establecer el orden aleatorio de los jugadores al inicio de la partida
+    /**
+     * Establece el orden aleatorio de los jugadores al inicio de la partida.
+     */
     public void establecerOrdenAleatorio() {
         if (jugadores != null && !jugadores.isEmpty()) {
-            java.util.Collections.shuffle(jugadores, random);
-            this.jugadorActualIndex = 0; // Reiniciar al primer jugador del nuevo orden
+            Collections.shuffle(jugadores, random);
+            this.jugadorActualIndex = 0;
             System.out.println("Orden de jugadores aleatorizado.");
         }
     }
 
-    public Jugador getJugadorActual() { // Renombrado de getJugadorEnTurno para coincidir con sugerencias anteriores
-        if (jugadores.isEmpty()) {
+    /**
+     * Obtiene el jugador que tiene el turno actual.
+     * @return El objeto Jugador en turno, o null si no hay jugadores.
+     */
+    @JsonIgnore // Ignorar este getter al serializar, ya que se deriva de jugadorActualIndex
+    public Jugador getJugadorActual() {
+        if (jugadores == null || jugadores.isEmpty() || jugadorActualIndex < 0 || jugadorActualIndex >= jugadores.size()) {
             return null;
         }
         return jugadores.get(jugadorActualIndex);
     }
 
+    /**
+     * Avanza al siguiente turno, cambiando al siguiente jugador en la lista.
+     */
     public void siguienteTurno() {
         if (jugadores.isEmpty()) {
             System.out.println("No hay jugadores en la partida para avanzar el turno.");
@@ -88,135 +114,69 @@ public class Partida {
         }
         this.jugadorActualIndex = (this.jugadorActualIndex + 1) % jugadores.size();
         System.out.println("Cambiando turno. Ahora es el turno de: " + getJugadorActual().getAlias());
-        // Aquí podrías añadir lógica para verificar el ganador después de cada turno
-        // if (verificarGanador(getJugadorActual())) {
-        //     System.out.println("¡" + getJugadorActual().getAlias() + " ha ganado la partida!");
-        //     // Lógica para finalizar el juego
-        // }
     }
 
-    // Debes asegurarte de que `jugador.getEmail()` sea realmente la clave correcta a usar.
-    // Si planeas usar `alias` como clave, asegúrate de que `alias` sea único entre los jugadores.
-    public void moverJugador(Jugador jugador, int pasos) {
-        String playerKey = jugador.getEmail(); // O jugador.getAlias()
-        if (playerKey == null || !posiciones.containsKey(playerKey)) {
-            System.out.println("Error: El jugador " + jugador.getAlias() + " no está en esta partida o no tiene clave de posición.");
-            return;
-        }
-        int currentPos = posiciones.getOrDefault(playerKey, 0);
-        // Asegúrate de que tablero.getRutaPrincipalCasillaIds() esté correctamente inicializado y sea accesible
-        // (Necesitarás una clase Tablero que tenga este método y un array de IDs de casillas válidas)
-        int newPos = (currentPos + pasos) % tablero.getRutaPrincipalCasillaIds().length; // Esto asume un camino lineal
-        posiciones.put(playerKey, newPos);
-        System.out.println(jugador.getAlias() + " se movió de la posición " + currentPos + " a la posición " + newPos);
-    }
 
     /**
-     * Añade un quesito a un jugador (ahora usa el método del Jugador).
-     *
-     * @param jugador   El jugador que gana el quesito.
-     * @param categoria La categoría del quesito ganado.
+     * Marca la partida como terminada y calcula la duración total.
      */
-    public void añadirQuesito(Jugador jugador, String categoria) {
-        if (jugador != null) {
-            jugador.addQuesito(categoria);
-            System.out.println(jugador.getAlias() + " ganó el quesito de " + categoria);
-        }
-    }
-
-    /**
-     * Verifica si un jugador ha ganado la partida (ahora usa los quesitos del Jugador).
-     *
-     * @param jugador El jugador a verificar.
-     * @return true si el jugador ha ganado, false en caso contrario.
-     */
-    public boolean verificarGanador(Jugador jugador) {
-        int quesitosNecesarios = 6;
-        return jugador != null && jugador.getQuesitosGanadosNombres().size() >= quesitosNecesarios;
-    }
-
     public void terminarPartida() {
         this.partidaTerminada = true;
         this.fechaFin = LocalDateTime.now();
-        this.tiempoTotalSegundos = Duration.between(fechaInicio, fechaFin).getSeconds();
+        if (fechaInicio != null && fechaFin != null) {
+            this.tiempoTotalSegundos = Duration.between(fechaInicio, fechaFin).getSeconds();
+        }
     }
 
-    // Getters y Setters
-    public List<Jugador> getJugadores() {
-        return jugadores;
-    }
-
+    public List<Jugador> getJugadores() { return jugadores; }
     public void setJugadores(List<Jugador> jugadores) {
         this.jugadores = jugadores;
-        // Al establecer los jugadores externamente, es posible que quieras reinicializar posiciones y orden
-        iniciar(jugadores); // Reinicializa las posiciones y aleatoriza el orden si se establece desde fuera
-    }
-
-    public Tablero getTablero() {
-        return tablero;
-    }
-
-    public void setTablero(Tablero tablero) {
-        this.tablero = tablero;
-    }
-
-    // Nombre consistente: getJugadorActualIndex / setJugadorActualIndex
-    public int getJugadorActualIndex() {
-        return jugadorActualIndex;
-    }
-
-    public void setJugadorActualIndex(int jugadorActualIndex) {
-        this.jugadorActualIndex = jugadorActualIndex;
-    }
-
-    // El mapa de posiciones debería basarse en una clave String para una serialización adecuada
-    public Map<String, Integer> getPosiciones() {
-        return posiciones;
-    }
-
-    public void setPosiciones(Map<String, Integer> posiciones) {
-        this.posiciones = posiciones;
-    }
-
-    public LocalDateTime getFechaInicio() {
-        return fechaInicio;
-    }
-
-    public void setFechaInicio(LocalDateTime fechaInicio) {
-        this.fechaInicio = fechaInicio;
-    }
-
-    public LocalDateTime getFechaFin() {
-        return fechaFin;
-    }
-
-    public void setFechaFin(LocalDateTime fechaFin) {
-        this.fechaFin = fechaFin;
-    }
-
-    public boolean isPartidaTerminada() {
-        return partidaTerminada;
-    }
-
-    public void setPartidaTerminada(boolean partidaTerminada) {
-        this.partidaTerminada = partidaTerminada;
-    }
-
-    public long getTiempoTotalSegundos() {
-        return tiempoTotalSegundos;
-    }
-
-    public void setTiempoTotalSegundos(long tiempoTotalSegundos) {
-        this.tiempoTotalSegundos = tiempoTotalSegundos;
-    }
-
-    // También podrías necesitar métodos para obtener un jugador por su clave (email/alias)
-    public Jugador getJugadorByEmail(String email) {
-        for (Jugador jugador : jugadores) {
-            if (jugador.getEmail() != null && jugador.getEmail().equals(email)) {
-                return jugador;
+        this.posiciones.clear();
+        if (jugadores != null) {
+            for (Jugador jugador : jugadores) {
+                if (jugador.getEmail() != null && !jugador.getEmail().isEmpty()) {
+                    this.posiciones.put(jugador.getEmail(), jugador.getCasillaActualId());
+                } else {
+                    this.posiciones.put(jugador.getAlias(), jugador.getCasillaActualId());
+                }
             }
         }
-        return null;
+    }
+
+    @JsonIgnore
+    public Tablero getTablero() { return tablero; }
+    @JsonIgnore
+    public void setTablero(Tablero tablero) { this.tablero = tablero; }
+
+
+    public long getTiempoRespuesta() { return tiempoRespuesta; }
+
+    /**
+     * Elimina un jugador de la partida.
+     * Si el jugador eliminado era el jugador actual, el turno se ajusta para el siguiente jugador.
+     * @param jugador El objeto Jugador a eliminar.
+     */
+    public void removeJugador(Jugador jugador) {
+        if (jugador == null || jugadores == null || jugadores.isEmpty()) {
+            return;
+        }
+        int indexToRemove = -1;
+        for (int i = 0; i < jugadores.size(); i++) {
+            if (jugadores.get(i).getAlias().equals(jugador.getAlias())) {
+                indexToRemove = i;
+                break;
+            }
+        }
+        if (indexToRemove != -1) {
+            jugadores.remove(indexToRemove);
+            System.out.println("Jugador " + jugador.getAlias() + " eliminado de la partida.");
+            if (jugadorActualIndex >= jugadores.size() && !jugadores.isEmpty()) {
+                jugadorActualIndex = 0;
+            } else if (indexToRemove < jugadorActualIndex) {
+                jugadorActualIndex--;
+            }
+        } else {
+            System.out.println("Jugador " + jugador.getAlias() + " no encontrado en la partida.");
+        }
     }
 }

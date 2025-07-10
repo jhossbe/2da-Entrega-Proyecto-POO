@@ -6,52 +6,57 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.example.triviaucab1.module.Jugador;
 import org.example.triviaucab1.module.JsonService;
 import org.example.triviaucab1.module.Partida;
-import org.example.triviaucab1.module.GestorEstadisticas; // Importa el gestor
+import org.example.triviaucab1.module.GestorEstadisticas;
+
 import java.io.IOException;
 import java.net.URL;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional; // Asegúrate de que solo haya un Optional importado
+import java.util.Optional;
 import java.util.ResourceBundle;
-
+import java.util.stream.Collectors;
 
 /**
- * Controlador para la ventana de selección de jugadores para una nueva partida.
- * Permite al usuario seleccionar jugadores de una lista de disponibles y pasarlos a una lista de seleccionados.
+ * Controlador para la vista de creación de nueva partida y selección de jugadores.
+ * Permite añadir nuevos jugadores, seleccionar jugadores existentes y configurar el tiempo de respuesta.
  */
 public class PartidaNuevaController implements Initializable {
 
-    @FXML
-    private ListView<Jugador> jugadoresDisponiblesListView;
-    @FXML
-    private ListView<Jugador> jugadoresSeleccionadosListView;
-    @FXML
-    private TextField tiempoRespuestaField;
-    private ObservableList<Jugador> jugadoresDisponiblesObservable; // Renombrado para evitar conflicto con el método
+    @FXML private TextField newPlayerEmailField;
+    @FXML private TextField newPlayerAliasField;
+    @FXML private ListView<Jugador> jugadoresDisponiblesListView;
+    @FXML private ListView<Jugador> jugadoresSeleccionadosListView;
+    @FXML private TextField tiempoRespuestaField;
+
+    private ObservableList<Jugador> jugadoresDisponiblesObservable;
     private ObservableList<Jugador> jugadoresSeleccionados;
     private JsonService jsonService;
-    private GestorEstadisticas gestorEstadisticas; // Instancia del gestor de estadísticas
+    private GestorEstadisticas gestorEstadisticas;
 
     /**
      * Método de inicialización llamado automáticamente por FXMLLoader después de que se carga el FXML.
-     * Aquí se inicializan las listas de jugadores y se cargan desde el JSON.
+     * Aquí se inicializan las listas de jugadores, se cargan desde el JSON y se configura el campo de tiempo.
      */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         jsonService = new JsonService();
-        gestorEstadisticas = new GestorEstadisticas(); // Inicializa el gestor de estadísticas
-
+        gestorEstadisticas = new GestorEstadisticas();
         jugadoresDisponiblesObservable = FXCollections.observableArrayList();
         jugadoresSeleccionados = FXCollections.observableArrayList();
-
-        // Configuración del CellFactory para mostrar solo el alias
+        jugadoresDisponiblesListView.setItems(jugadoresDisponiblesObservable);
+        jugadoresSeleccionadosListView.setItems(jugadoresSeleccionados);
         jugadoresDisponiblesListView.setCellFactory(lv -> new ListCell<Jugador>() {
             @Override
             protected void updateItem(Jugador jugador, boolean empty) {
@@ -66,216 +71,195 @@ public class PartidaNuevaController implements Initializable {
                 setText(empty ? null : jugador.getAlias());
             }
         });
-
-        cargarJugadoresYFusionarEstadisticas(); // Nuevo método para cargar y fusionar
+        tiempoRespuestaField.setText("10");
+        cargarJugadoresYFusionarEstadisticas();
     }
 
     /**
      * Carga los jugadores desde el archivo JSON y los fusiona con sus estadísticas globales.
      */
     private void cargarJugadoresYFusionarEstadisticas() {
-        // 1. Carga los jugadores básicos (solo email y alias) del jugadores.json
         List<Jugador> jugadoresBase = jsonService.cargarJugadores();
-
-        // 2. Carga todas las estadísticas acumuladas de todos los jugadores desde estadisticasJugadores.json
+        System.out.println("DEBUG (PartidaNuevaController): Jugadores base cargados: " + jugadoresBase.size());
         List<Jugador> jugadoresConEstadisticasGlobales = gestorEstadisticas.getRankingJugadores();
-
-        // 3. Fusiona las estadísticas globales en los jugadores base
+        System.out.println("DEBUG (PartidaNuevaController): Estadísticas globales cargadas para: " + jugadoresConEstadisticasGlobales.size() + " jugadores.");
+        jugadoresDisponiblesObservable.clear();
         for (Jugador jugadorBase : jugadoresBase) {
             Optional<Jugador> jugadorGlobalConStats = jugadoresConEstadisticasGlobales.stream()
-                    .filter(j -> j.getEmail().equals(jugadorBase.getEmail()))
+                    .filter(j -> j.getEmail() != null && jugadorBase.getEmail() != null && j.getEmail().equals(jugadorBase.getEmail()))
                     .findFirst();
 
             if (jugadorGlobalConStats.isPresent()) {
-                // Si encontramos estadísticas globales, las asignamos al jugador para la partida.
                 jugadorBase.setEstadisticas(jugadorGlobalConStats.get().getEstadisticas());
-                jugadorBase.setQuesitosGanadosNombres(jugadorGlobalConStats.get().getQuesitosGanadosNombres()); // También quesitos
-                System.out.println("DEBUG: Estadísticas y quesitos globales cargados para: " + jugadorBase.getAlias() +
-                        " - Preguntas Correctas: " + jugadorBase.getEstadisticas().getPreguntasCorrectasTotal() +
-                        ", Quesitos: " + jugadorBase.getQuesitosGanadosNombres());
-            } else {
-                // Si el jugador no existe en estadisticasJugadores.json (es un jugador nuevo),
-                // sus estadísticas y quesitos permanecerán en cero/vacío, como se inicializaron en el constructor de Jugador.
-                System.out.println("DEBUG: No se encontraron estadísticas globales para: " + jugadorBase.getAlias() + ". Se usarán estadísticas por defecto (cero/vacío).");
+                jugadorBase.setQuesitosGanadosNombres(jugadorGlobalConStats.get().getQuesitosGanadosNombres());
+                System.out.println("DEBUG (PartidaNuevaController): Estadísticas fusionadas para: " + jugadorBase.getAlias());
             }
+            jugadoresDisponiblesObservable.add(jugadorBase);
         }
-
-        // Añade los jugadores fusionados a la lista de disponibles
-        jugadoresDisponiblesObservable.addAll(jugadoresBase);
-        jugadoresDisponiblesListView.setItems(jugadoresDisponiblesObservable);
+        System.out.println("DEBUG (PartidaNuevaController): Jugadores disponibles en ListView: " + jugadoresDisponiblesObservable.size());
     }
 
     /**
-     * Añade el jugador seleccionado de la lista de disponibles a la lista de seleccionados.
+     * Maneja la acción de añadir un nuevo jugador.
+     * Valida los campos y añade el jugador a la lista de disponibles.
+     * @param event El evento de acción.
      */
     @FXML
-    private void handleAddPlayer() {
-        // **INICIO DE LA MODIFICACIÓN**
-        // Comprueba si ya se ha alcanzado el número máximo de jugadores.
-        if (jugadoresSeleccionados.size() >= 6) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Límite de Jugadores", "No se pueden añadir más de 6 jugadores a la partida.");
-            return; // Detiene la ejecución del método para no añadir más jugadores.
-        }
-        // **FIN DE LA MODIFICACIÓN**
+    private void handleAddPlayer(ActionEvent event) {
+        String email = newPlayerEmailField.getText().trim();
+        String alias = newPlayerAliasField.getText().trim();
 
-        Jugador selectedPlayer = jugadoresDisponiblesListView.getSelectionModel().getSelectedItem();
-        if (selectedPlayer != null) {
-            if (!jugadoresSeleccionados.contains(selectedPlayer)) {
-                jugadoresSeleccionados.add(selectedPlayer);
-                jugadoresSeleccionadosListView.setItems(jugadoresSeleccionados);
-                jugadoresDisponiblesObservable.remove(selectedPlayer);
-            } else {
-                mostrarAlerta(Alert.AlertType.WARNING, "Jugador Duplicado", "Este jugador ya ha sido añadido a la lista de seleccionados.");
-            }
-        } else {
-            mostrarAlerta(Alert.AlertType.WARNING, "Selección Vacía", "Por favor, selecciona un jugador de la lista de disponibles.");
-        }
-    }
-
-    /**
-     * Remueve el jugador seleccionado de la lista de seleccionados y lo devuelve a la de disponibles.
-     */
-    @FXML
-    private void handleRemovePlayer() {
-        Jugador selectedPlayer = jugadoresSeleccionadosListView.getSelectionModel().getSelectedItem();
-        if (selectedPlayer != null) {
-            jugadoresSeleccionados.remove(selectedPlayer);
-            // Add back to available list if not already there
-            if (!jugadoresDisponiblesObservable.contains(selectedPlayer)) {
-                jugadoresDisponiblesObservable.add(selectedPlayer);
-                // Sort the available list by alias to keep it tidy
-                FXCollections.sort(jugadoresDisponiblesObservable, (j1, j2) -> j1.getAlias().compareToIgnoreCase(j2.getAlias()));
-            }
-        } else {
-            mostrarAlerta(Alert.AlertType.WARNING, "Selección Vacía", "Por favor, selecciona un jugador de la lista de seleccionados para quitar.");
-        }
-    }
-
-    /**
-     * Maneja la acción cuando el botón "Jugar" es presionado.
-     * Inicia una nueva partida con los jugadores seleccionados.
-     */
-
-    @FXML
-    private void handleJugar(ActionEvent event) {
-        if (jugadoresSeleccionados.isEmpty()) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Sin Jugadores", "Debes seleccionar al menos un jugador para iniciar la partida.");
+        if (email.isEmpty() || alias.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "Campos Vacíos", "Por favor, ingrese el email y el alias del jugador.");
             return;
         }
 
-        // Leer y validar el tiempo de respuesta ingresado
-        String textoTiempo = tiempoRespuestaField.getText().trim();
-        int tiempoRespuesta;
-        try {
-            tiempoRespuesta = Integer.parseInt(textoTiempo);
-            if (tiempoRespuesta <= 0) {
-                mostrarAlerta(Alert.AlertType.WARNING, "Valor inválido", "El tiempo debe ser un número mayor a 0.");
-                tiempoRespuestaField.requestFocus();
-                return; // NO avanza, espera que el usuario arregle el valor
+        boolean emailExists = jugadoresDisponiblesObservable.stream().anyMatch(j -> j.getEmail().equalsIgnoreCase(email)) ||
+                jugadoresSeleccionados.stream().anyMatch(j -> j.getEmail().equalsIgnoreCase(email));
+        if (emailExists) {
+            showAlert(Alert.AlertType.WARNING, "Email Existente", "Ya existe un jugador con este email. Por favor, use otro.");
+            return;
+        }
+        Jugador nuevoJugador = new Jugador(email, alias);
+        List<Jugador> todosLosJugadoresActualizados = new ArrayList<>(jugadoresDisponiblesObservable);
+        todosLosJugadoresActualizados.addAll(jugadoresSeleccionados);
+        todosLosJugadoresActualizados.add(nuevoJugador);
+        jsonService.guardarJugadores(todosLosJugadoresActualizados.stream().distinct().collect(Collectors.toList()));
+
+        jugadoresDisponiblesObservable.add(nuevoJugador);
+        newPlayerEmailField.clear();
+        newPlayerAliasField.clear();
+        showAlert(Alert.AlertType.INFORMATION, "Jugador Añadido", "Jugador '" + alias + "' añadido exitosamente.");
+        System.out.println("DEBUG (PartidaNuevaController): Jugador añadido: " + alias);
+    }
+
+    /**
+     * Maneja la acción de seleccionar un jugador de la lista de disponibles a la lista de seleccionados.
+     * @param event El evento de acción.
+     */
+    @FXML
+    private void handleSelectPlayer(ActionEvent event) {
+        Jugador selectedPlayer = jugadoresDisponiblesListView.getSelectionModel().getSelectedItem();
+        if (selectedPlayer != null) {
+            if (jugadoresSeleccionados.size() >= 6) {
+                showAlert(Alert.AlertType.WARNING, "Límite de Jugadores", "No puedes seleccionar más de 6 jugadores.");
+                return;
             }
-        } catch (Exception e) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Valor inválido", "Debes ingresar un número válido para el tiempo de respuesta.");
-            tiempoRespuestaField.requestFocus();
-            return; // NO avanza, espera que el usuario arregle el valor
+            if (!jugadoresSeleccionados.contains(selectedPlayer)) {
+                jugadoresSeleccionados.add(selectedPlayer);
+                jugadoresDisponiblesObservable.remove(selectedPlayer);
+                System.out.println("DEBUG (PartidaNuevaController): Jugador seleccionado: " + selectedPlayer.getAlias());
+            } else {
+                showAlert(Alert.AlertType.INFORMATION, "Jugador Ya Seleccionado", "Este jugador ya ha sido seleccionado.");
+            }
+        } else {
+            showAlert(Alert.AlertType.WARNING, "Ningún Jugador Seleccionado", "Por favor, seleccione un jugador de la lista de disponibles.");
+        }
+    }
+
+    /**
+     * Maneja la acción de deseleccionar un jugador de la lista de seleccionados.
+     * @param event El evento de acción.
+     */
+    @FXML
+    private void handleDeselectPlayer(ActionEvent event) {
+        Jugador deselectedPlayer = jugadoresSeleccionadosListView.getSelectionModel().getSelectedItem();
+        if (deselectedPlayer != null) {
+            jugadoresSeleccionados.remove(deselectedPlayer);
+            jugadoresDisponiblesObservable.add(deselectedPlayer);
+            System.out.println("DEBUG (PartidaNuevaController): Jugador deseleccionado: " + deselectedPlayer.getAlias());
+        } else {
+            showAlert(Alert.AlertType.WARNING, "Ningún Jugador Deseleccionado", "Por favor, seleccione un jugador de la lista de seleccionados.");
+        }
+    }
+
+    /**
+     * Maneja la acción de iniciar la partida con los jugadores seleccionados.
+     * @param event El evento de acción.
+     */
+    @FXML
+    private void handleIniciarPartida(ActionEvent event) {
+        List<Jugador> jugadoresParaPartida = new ArrayList<>(jugadoresSeleccionados);
+
+        System.out.println("DEBUG (PartidaNuevaController): Jugadores seleccionados ANTES de crear Partida: " + jugadoresParaPartida.size());
+
+        if (jugadoresParaPartida.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "No hay Jugadores", "Por favor, seleccione al menos un jugador para iniciar la partida.");
+            return;
         }
 
-        // Si llegaste aquí, el valor es válido
-        // Crear una nueva partida y pasar los jugadores seleccionados (¡que ya tienen sus estadísticas fusionadas!)
+        long tiempoRespuesta;
+        try {
+            tiempoRespuesta = Long.parseLong(tiempoRespuestaField.getText());
+            if (tiempoRespuesta <= 0) {
+                showAlert(Alert.AlertType.WARNING, "Tiempo Inválido", "El tiempo de respuesta debe ser un número positivo.");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            showAlert(Alert.AlertType.WARNING, "Formato de Tiempo Inválido", "Por favor, ingrese un número válido para el tiempo de respuesta.");
+            return;
+        }
+        jugadoresParaPartida.forEach(jugador -> {
+            jugador.setQuesitosGanadosNombres(jugador.getQuesitosGanadosNombres());
+        });
         Partida nuevaPartida = new Partida();
-        nuevaPartida.iniciar(new ArrayList<>(jugadoresSeleccionados)); // Pasa la lista de jugadores
-        nuevaPartida.setTiempoRespuesta(tiempoRespuesta);
+        nuevaPartida.iniciar(jugadoresParaPartida, tiempoRespuesta);
+
+        System.out.println("DEBUG (PartidaNuevaController): Partida creada con jugadores: " + nuevaPartida.getJugadores().size());
+
+        jsonService.guardarPartida(nuevaPartida);
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/triviaucab1/JuegoView.fxml"));
             Parent juegoRoot = loader.load();
-
             JuegoController juegoController = loader.getController();
-            if (juegoController != null) {
-                juegoController.setPartida(nuevaPartida);
-                juegoController.setGestorEstadisticas(gestorEstadisticas);
-            }
+            juegoController.setPartida(nuevaPartida);
 
-            Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(juegoRoot));
-            stage.setTitle("TRIVIA UCAB - El Juego");
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            Scene scene = new Scene(juegoRoot);
+            stage.setScene(scene);
+            stage.setTitle("Trivia UCAB - Juego");
             stage.setFullScreen(true);
             stage.show();
-
         } catch (IOException e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error al Cargar Juego", "No se pudo cargar la vista del juego.", "Detalles: " + e.getMessage());
             e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error al Cargar Juego", "No se pudo cargar la vista del juego: " + e.getMessage());
         }
     }
 
     /**
-     * Maneja la acción cuando el botón "Regresar" es presionado.
-     * Retorna a la ventana principal (Menú Principal).
-     *
-     * @param event El evento de acción que disparó este método.
+     * Maneja la acción de cancelar la selección de jugadores y regresar al menú principal.
+     * @param event El evento de acción.
      */
     @FXML
-    private void handleRegresar(ActionEvent event) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Confirmar Regreso");
-        alert.setHeaderText("¿Estás seguro que deseas regresar al menú principal?");
-        alert.setContentText("Se perderá la selección actual de jugadores.");
-
-        Optional<ButtonType> result = alert.showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.OK) {
-            try {
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/org/example/triviaucab1/MenuPrincipalView.fxml"));
-                Parent menuPrincipalRoot = fxmlLoader.load();
-                Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
-                stage.setScene(new Scene(menuPrincipalRoot));
-                stage.setTitle("TRIVIA UCAB - Menú Principal");
-                stage.setFullScreen(true);
-                stage.show();
-            } catch (IOException e) {
-                System.err.println("Error al cargar la ventana del Menú Principal: " + e.getMessage());
-                e.printStackTrace();
-                new Alert(Alert.AlertType.ERROR, "Error interno: No se pudo cargar la vista del menú principal. Revisa la ruta del FXML en el código. Detalles: " + e.getMessage()).showAndWait();
-            }
+    private void handleCancelar(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/triviaucab1/MenuPrincipalView.fxml"));
+            Parent menuPrincipalRoot = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            Scene scene = new Scene(menuPrincipalRoot);
+            stage.setScene(scene);
+            stage.setTitle("Trivia UCAB - Menú Principal");
+            stage.setFullScreen(true);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error al Cargar Menú", "No se pudo cargar la vista del menú principal: " + e.getMessage());
         }
     }
 
     /**
-     * Maneja la acción cuando el botón "Salir" es presionado.
-     * Cierra la aplicación con una confirmación.
-     *
-     * @param event El evento de acción que disparó este método.
+     * Muestra una ventana de alerta con el tipo, título y mensaje especificados.
+     * @param alertType El tipo de alerta (INFORMATION, WARNING, ERROR, etc.).
+     * @param title El título de la ventana de alerta.
+     * @param message El mensaje a mostrar en la alerta.
      */
-    @FXML
-    private void handleSalir(ActionEvent event) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Confirmar Salida");
-        alert.setHeaderText("¿Estás seguro que deseas salir de la aplicación?");
-        alert.setContentText("Se cerrará la ventana actual.");
-
-        Optional<ButtonType> result = alert.showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.OK) {
-            Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
-            stage.close();
-
-        }
-    }
-
-    /**
-     * Muestra una alerta al usuario.
-     *
-     * @param tipo      Tipo de alerta (INFORMATION, WARNING, ERROR, CONFIRMATION).
-     * @param titulo    Título de la ventana de alerta.
-     * @param encabezado Texto del encabezado de la alerta.
-     * @param contenido Contenido principal de la alerta.
-     */
-    private void mostrarAlerta(Alert.AlertType tipo, String titulo, String encabezado, String contenido) {
-        Alert alert = new Alert(tipo);
-        alert.setTitle(titulo);
-        alert.setHeaderText(encabezado);
-        alert.setContentText(contenido);
+    private void showAlert(Alert.AlertType alertType, String title, String message) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
         alert.showAndWait();
     }
-
-    private void mostrarAlerta(Alert.AlertType tipo, String titulo, String encabezado) {
-        mostrarAlerta(tipo, titulo, encabezado, null);
-    }
 }
+
