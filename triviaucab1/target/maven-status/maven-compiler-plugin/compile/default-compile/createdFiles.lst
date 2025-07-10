@@ -17,6 +17,7 @@ org/example/triviaucab1/module/GestorPreguntas.class
 org/example/triviaucab1/fichadecorator/PuntoArteYLiteratura.class
 org/example/triviaucab1/module/JsonService.class
 org/example/triviaucab1/controller/PartidaGuardadaController.class
+org/example/triviaucab1/TestFicha.class
 org/example/triviaucab1/controller/DadoController.class
 org/example/triviaucab1/module/Pregunta.class
 org/example/triviaucab1/fichadecorator/PuntoEntretenimiento.class

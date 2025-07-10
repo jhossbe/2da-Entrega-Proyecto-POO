@@ -13,7 +13,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -44,11 +43,11 @@ public class JuegoController {
     @FXML private Label tiempoRespuestaLabel; // No usado en este ejemplo, pero se mantiene
 
     @FXML private Canvas fichaJugadorCanvas;
+    @FXML private Canvas fichaEnTableroCanvas; // Canvas para la ficha decorada en el tablero
     private GestorEstadisticas gestorEstadisticas;
     private GrafoTablero grafoTablero;
     private int ultimoValorDado = 0;
     private boolean puedeMover = false;
-    private Circle fichaEnTablero;
     private List<CasillaNode> movimientosPosibles = new ArrayList<>();
     private Map<String, CasillaNode> mapaIDaNodo = new HashMap<>();
     private Map<CasillaNode, Rectangle> mapaNodoARect = new HashMap<>();
@@ -109,12 +108,6 @@ public class JuegoController {
             }
         }
         conectarCasillasCorrectamente();
-        fichaEnTablero = new Circle(17, Color.WHITE);
-        fichaEnTablero.setStroke(Color.BLACK);
-        fichaEnTablero.setStrokeWidth(2);
-        fichaEnTablero.setMouseTransparent(true);
-        fichaEnTablero.setVisible(false);
-        rootPane.getChildren().add(fichaEnTablero);
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/triviaucab1/DadoView.fxml"));
@@ -168,7 +161,11 @@ public class JuegoController {
 
         if (jugadorEnTurno == null) {
             System.err.println("Error: No hay jugador en turno para actualizar la UI.");
-            fichaEnTablero.setVisible(false);
+            // Limpiar el canvas del tablero si no hay jugador
+            if (fichaEnTableroCanvas != null) {
+                GraphicsContext gc = fichaEnTableroCanvas.getGraphicsContext2D();
+                gc.clearRect(0, 0, fichaEnTableroCanvas.getWidth(), fichaEnTableroCanvas.getHeight());
+            }
             return;
         }
 
@@ -178,7 +175,6 @@ public class JuegoController {
 
         String idCasillaJugador = jugadorEnTurno.getCasillaActualId();
         if (idCasillaJugador == null || idCasillaJugador.isEmpty()) {
-
             idCasillaJugador = "c";
             jugadorEnTurno.setCasillaActualId("c"); // Establece la casilla inicial si no tiene
         }
@@ -187,12 +183,22 @@ public class JuegoController {
 
         if (casillaDelJugadorEnGrafo == null) {
             System.err.println("❌ ERROR: La casilla '" + idCasillaJugador + "' del jugador no se encontró en el tablero.");
-            fichaEnTablero.setVisible(false);
+            // Limpiar el canvas del tablero si no se encuentra la casilla
+            if (fichaEnTableroCanvas != null) {
+                GraphicsContext gc = fichaEnTableroCanvas.getGraphicsContext2D();
+                gc.clearRect(0, 0, fichaEnTableroCanvas.getWidth(), fichaEnTableroCanvas.getHeight());
+            }
             return;
         }
-        fichaEnTablero.setLayoutX(casillaDelJugadorEnGrafo.getX());
-        fichaEnTablero.setLayoutY(casillaDelJugadorEnGrafo.getY());
-        fichaEnTablero.setVisible(true);
+
+        // Posicionar el Canvas de la ficha en el tablero centrado en la casilla
+        fichaEnTableroCanvas.setLayoutX(casillaDelJugadorEnGrafo.getX() - fichaEnTableroCanvas.getWidth() / 2);
+        fichaEnTableroCanvas.setLayoutY(casillaDelJugadorEnGrafo.getY() - fichaEnTableroCanvas.getHeight() / 2);
+        
+        // Dibujar la ficha decorada en el tablero
+        dibujarFichaEnTablero(jugadorEnTurno);
+        
+        // Dibujar la ficha en el panel lateral también
         dibujarFichaDelJugador(jugadorEnTurno);
 
         System.out.println("🔄 UI actualizada para: " + jugadorEnTurno.getAlias() + " en casilla: " + idCasillaJugador);
@@ -226,6 +232,30 @@ public class JuegoController {
         }
     }
 
+    /**
+     * Dibuja la ficha decorada del jugador en el Canvas del tablero.
+     * Utiliza el decorador para mostrar la ficha "torta" con los quesitos ganados.
+     */
+    public void dibujarFichaEnTablero(Jugador jugador) {
+        if (fichaEnTableroCanvas != null && jugador != null && jugador.getFichaVisual() != null) {
+            GraphicsContext gc = fichaEnTableroCanvas.getGraphicsContext2D();
+            gc.clearRect(0, 0, fichaEnTableroCanvas.getWidth(), fichaEnTableroCanvas.getHeight());
+
+            Ficha fichaADibujar = jugador.getFichaVisual();
+
+            double canvasWidth = fichaEnTableroCanvas.getWidth();
+            double canvasHeight = fichaEnTableroCanvas.getHeight();
+            double radius = Math.min(canvasWidth, canvasHeight) / 2.2;
+            double centerX = canvasWidth / 2;
+            double centerY = canvasHeight / 2;
+
+            fichaADibujar.dibujar(gc, centerX, centerY, radius);
+            System.out.println("Ficha en tablero dibujada para: " + jugador.getAlias());
+        } else {
+            System.err.println("Error: No se pudo dibujar la ficha en el tablero. Canvas no inicializado o Jugador/Ficha es nulo.");
+        }
+    }
+
     public void lanzarYMostrarMovimientos(int valorDado) {
         this.ultimoValorDado = valorDado;
         this.puedeMover = true;
@@ -252,8 +282,10 @@ public class JuegoController {
                 System.err.println("Error grave: Casilla central 'c' no encontrada en el tablero. No se puede continuar.");
                 return;
             }
-            fichaEnTablero.setLayoutX(casillaActualDelJugador.getX());
-            fichaEnTablero.setLayoutY(casillaActualDelJugador.getY());
+            // Posicionar el Canvas centrado en la casilla central
+            fichaEnTableroCanvas.setLayoutX(casillaActualDelJugador.getX() - fichaEnTableroCanvas.getWidth() / 2);
+            fichaEnTableroCanvas.setLayoutY(casillaActualDelJugador.getY() - fichaEnTableroCanvas.getHeight() / 2);
+            dibujarFichaEnTablero(jugadorEnTurno);
         }
 
         // Obtener todos los destinos posibles sin filtrar aún
@@ -319,8 +351,13 @@ public class JuegoController {
                     return;
                 }
                 jugadorEnTurno.setCasillaActualId(idDestino);
-                fichaEnTablero.setLayoutX(nodoDestino.getX());
-                fichaEnTablero.setLayoutY(nodoDestino.getY());
+                
+                // Posicionar el Canvas centrado en la nueva casilla
+                fichaEnTableroCanvas.setLayoutX(nodoDestino.getX() - fichaEnTableroCanvas.getWidth() / 2);
+                fichaEnTableroCanvas.setLayoutY(nodoDestino.getY() - fichaEnTableroCanvas.getHeight() / 2);
+                
+                // Dibujar la ficha decorada en la nueva posición
+                dibujarFichaEnTablero(jugadorEnTurno);
                 movimientosPosibles.clear();
                 for (Rectangle r : mapaNodoARect.values()) {
                     r.setStroke(Color.BLACK);
@@ -439,7 +476,9 @@ public class JuegoController {
         if (respuestaCorrecta) {
             System.out.println("¡Respuesta Correcta! " + jugadorEnTurnoAntes.getAlias() + " ha ganado un quesito de " + categoriaPregunta);
             jugadorEnTurnoAntes.addQuesito(categoriaPregunta);
+            // Actualizar ambas fichas visuales: la del panel lateral y la del tablero
             dibujarFichaDelJugador(jugadorEnTurnoAntes);
+            dibujarFichaEnTablero(jugadorEnTurnoAntes);
             jugadorEnTurnoAntes.getEstadisticas().incrementarPreguntasCorrectasTotal();
             jugadorEnTurnoAntes.getEstadisticas().incrementarPreguntasCorrectasPorCategoria(categoriaPregunta);
             jugadorEnTurnoAntes.getEstadisticas().añadirTiempoRespuestaCorrecta(tiempoRespuesta);
