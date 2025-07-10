@@ -5,6 +5,8 @@ module org.example.triviaucab1 {
     requires org.controlsfx.controls;
     requires com.dlsc.formsfx;
     requires com.fasterxml.jackson.databind;
+    requires com.fasterxml.jackson.datatype.jsr310;
+    requires com.fasterxml.jackson.annotation;
 
     opens org.example.triviaucab1 to javafx.fxml;
     exports org.example.triviaucab1;

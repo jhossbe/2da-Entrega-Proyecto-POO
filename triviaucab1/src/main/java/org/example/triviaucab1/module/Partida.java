@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.time.Duration;
 import java.util.Collections; // <--- AÑADE ESTA IMPORTACIÓN
 import java.util.Random;      // <--- AÑADE ESTA IMPORTACIÓN
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class Partida {
     private List<Jugador> jugadores;
@@ -67,6 +68,7 @@ public class Partida {
         }
     }
 
+    @JsonIgnore
     public Jugador getJugadorActual() { // Renombrado de getJugadorEnTurno para coincidir con sugerencias anteriores
         if (jugadores.isEmpty()) {
             return null;
