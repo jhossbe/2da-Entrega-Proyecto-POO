@@ -22,6 +22,7 @@ import javafx.application.Platform;
 import org.example.triviaucab1.module.GestorEstadisticas;
 import org.example.triviaucab1.fichadecorator.Ficha;
 import org.example.triviaucab1.module.GestorPreguntas;
+import org.example.triviaucab1.module.JsonService;
 import org.example.triviaucab1.module.Jugador;
 import org.example.triviaucab1.module.Partida;
 import org.example.triviaucab1.module.Pregunta;
@@ -45,6 +46,7 @@ public class JuegoController {
     @FXML private Canvas fichaEnTableroCanvas;
     @FXML private Canvas fichaJugadorCanvas;
     private GestorEstadisticas gestorEstadisticas;
+    private JsonService jsonService;
     private GrafoTablero grafoTablero;
     private int ultimoValorDado = 0;
     private boolean puedeMover = false;
@@ -65,6 +67,7 @@ public class JuegoController {
         totalCategoriasParaGanar = gestorPreguntas.getTotalCategorias();
         System.out.println("Total de categorías de quesitos posibles para ganar: " + totalCategoriasParaGanar);
         gestorEstadisticas = new GestorEstadisticas();
+        jsonService = new JsonService();
         grafoTablero = new GrafoTablero();
 
         // Estas son las definiciones de tus casillas y categorías
@@ -296,6 +299,7 @@ public class JuegoController {
             System.out.println("   ❌ No hay movimientos posibles (o todos fueron filtrados). Pasando el turno.");
             puedeMover = false;
             partida.siguienteTurno();
+            guardarPartidaAutomaticamente();
             actualizarUIJugadorActual();
             return;
         }
@@ -386,6 +390,7 @@ public class JuegoController {
 
                         preguntaController.setJuegoController(this);
                         preguntaController.setPregunta(finalPregunta);
+                        preguntaController.setTiempoRespuestaSegundos(partida.getTiempoRespuestaSegundos());
 
                         Stage preguntaStage = new Stage();
                         preguntaStage.setScene(new Scene(root));
@@ -647,6 +652,22 @@ public class JuegoController {
         } catch (IOException e) {
             e.printStackTrace();
             System.err.println("Error al cargar la vista del menú principal: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Guarda automáticamente la partida actual en JSON.
+     */
+    private void guardarPartidaAutomaticamente() {
+        try {
+            if (partida != null && jsonService != null) {
+                jsonService.guardarPartida(partida);
+                System.out.println("💾 Partida guardada automáticamente con tiempo de respuesta: " + 
+                    partida.getTiempoRespuestaSegundos() + " segundos");
+            }
+        } catch (Exception e) {
+            System.err.println("Error al guardar partida automáticamente: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

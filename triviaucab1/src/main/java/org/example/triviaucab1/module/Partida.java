@@ -19,6 +19,7 @@ public class Partida {
     private LocalDateTime fechaFin;
     private boolean partidaTerminada;
     private long tiempoTotalSegundos;
+    private int tiempoRespuestaSegundos; // Tiempo límite para responder preguntas
     private Random random; // <--- AÑADE ESTE CAMPO
 
     public Partida() {
@@ -30,6 +31,7 @@ public class Partida {
         this.fechaInicio = LocalDateTime.now();
         this.partidaTerminada = false;
         this.tiempoTotalSegundos = 0;
+        this.tiempoRespuestaSegundos = 30; // Valor por defecto: 30 segundos
         this.random = new Random(); // <--- INICIALIZA Random
     }
 
@@ -199,6 +201,14 @@ public class Partida {
 
     public void setTiempoTotalSegundos(long tiempoTotalSegundos) {
         this.tiempoTotalSegundos = tiempoTotalSegundos;
+    }
+
+    public int getTiempoRespuestaSegundos() {
+        return tiempoRespuestaSegundos;
+    }
+
+    public void setTiempoRespuestaSegundos(int tiempoRespuestaSegundos) {
+        this.tiempoRespuestaSegundos = tiempoRespuestaSegundos;
     }
 
     // También podrías necesitar métodos para obtener un jugador por su clave (email/alias)

@@ -13,6 +13,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.example.triviaucab1.module.Jugador;
 import org.example.triviaucab1.module.JsonService;
@@ -36,6 +37,8 @@ public class PartidaNuevaController implements Initializable {
     private ListView<Jugador> jugadoresDisponiblesListView;
     @FXML
     private ListView<Jugador> jugadoresSeleccionadosListView;
+    @FXML
+    private TextField tiempoRespuestaTextField;
 
     private ObservableList<Jugador> jugadoresDisponiblesObservable; // Renombrado para evitar conflicto con el método
     private ObservableList<Jugador> jugadoresSeleccionados;
@@ -71,6 +74,9 @@ public class PartidaNuevaController implements Initializable {
         });
 
         cargarJugadoresYFusionarEstadisticas(); // Nuevo método para cargar y fusionar
+        
+        // Configure numeric input validation for response time field
+        configurarValidacionTiempoRespuesta();
     }
 
     /**
@@ -106,6 +112,49 @@ public class PartidaNuevaController implements Initializable {
         // Añade los jugadores fusionados a la lista de disponibles
         jugadoresDisponiblesObservable.addAll(jugadoresBase);
         jugadoresDisponiblesListView.setItems(jugadoresDisponiblesObservable);
+    }
+
+    /**
+     * Configura la validación del campo de tiempo de respuesta para aceptar solo números positivos.
+     */
+    private void configurarValidacionTiempoRespuesta() {
+        tiempoRespuestaTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.matches("\\d*")) {
+                tiempoRespuestaTextField.setText(newValue.replaceAll("[^\\d]", ""));
+            }
+        });
+    }
+
+    /**
+     * Obtiene y valida el tiempo de respuesta ingresado por el usuario.
+     * @return El tiempo de respuesta en segundos, o 30 si no es válido.
+     */
+    private int obtenerTiempoRespuesta() {
+        String tiempoTexto = tiempoRespuestaTextField.getText().trim();
+        if (tiempoTexto.isEmpty()) {
+            return 30; // Valor por defecto
+        }
+        try {
+            int tiempo = Integer.parseInt(tiempoTexto);
+            if (tiempo <= 0) {
+                mostrarAlerta(Alert.AlertType.WARNING, "Tiempo Inválido", 
+                    "El tiempo de respuesta debe ser mayor a 0 segundos. Se usará el valor por defecto de 30 segundos.");
+                tiempoRespuestaTextField.setText("30");
+                return 30;
+            }
+            if (tiempo > 300) { // Máximo 5 minutos
+                mostrarAlerta(Alert.AlertType.WARNING, "Tiempo Muy Alto", 
+                    "El tiempo de respuesta no puede ser mayor a 300 segundos. Se usará 300 segundos.");
+                tiempoRespuestaTextField.setText("300");
+                return 300;
+            }
+            return tiempo;
+        } catch (NumberFormatException e) {
+            mostrarAlerta(Alert.AlertType.WARNING, "Tiempo Inválido", 
+                "El tiempo de respuesta debe ser un número válido. Se usará el valor por defecto de 30 segundos.");
+            tiempoRespuestaTextField.setText("30");
+            return 30;
+        }
     }
 
     /**
@@ -165,8 +214,12 @@ public class PartidaNuevaController implements Initializable {
             return;
         }
 
+        // Obtener y validar el tiempo de respuesta
+        int tiempoRespuesta = obtenerTiempoRespuesta();
+
         // Crear una nueva partida y pasar los jugadores seleccionados (¡que ya tienen sus estadísticas fusionadas!)
         Partida nuevaPartida = new Partida();
+        nuevaPartida.setTiempoRespuestaSegundos(tiempoRespuesta); // Establecer el tiempo de respuesta
         nuevaPartida.iniciar(new ArrayList<>(jugadoresSeleccionados)); // Pasa la lista de jugadores
 
         try {

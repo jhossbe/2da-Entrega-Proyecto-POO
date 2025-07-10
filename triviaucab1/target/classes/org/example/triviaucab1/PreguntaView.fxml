@@ -16,6 +16,11 @@
                 <Font name="System Bold" size="18.0" />
             </font>
         </Label>
+        <Label fx:id="contadorTiempoLabel" text="Tiempo: 30s" textFill="WHITE" alignment="CENTER">
+            <font>
+                <Font name="System Bold" size="16.0" />
+            </font>
+        </Label>
         <Label fx:id="preguntaLabel" alignment="CENTER" contentDisplay="CENTER" text="¿Cuál es la capital de Francia?" textAlignment="CENTER" textFill="WHITE" wrapText="true">
             <font>
                 <Font size="24.0" />

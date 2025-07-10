@@ -1,0 +1,14 @@
+# Build artifacts
+triviaucab1/target/
+*.class
+
+# IDE files
+.idea/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Game save files (optional - remove if you want to track them)
+partida.json
