@@ -42,13 +42,12 @@ public class JuegoController {
     @FXML private Label jugadorEnTurnoLabel;
     @FXML private VBox categoriasJugadorVBox; // No usado en este ejemplo, pero se mantiene
     @FXML private Label tiempoRespuestaLabel; // No usado en este ejemplo, pero se mantiene
-
+    @FXML private Canvas fichaEnTableroCanvas;
     @FXML private Canvas fichaJugadorCanvas;
     private GestorEstadisticas gestorEstadisticas;
     private GrafoTablero grafoTablero;
     private int ultimoValorDado = 0;
     private boolean puedeMover = false;
-    private Circle fichaEnTablero;
     private List<CasillaNode> movimientosPosibles = new ArrayList<>();
     private Map<String, CasillaNode> mapaIDaNodo = new HashMap<>();
     private Map<CasillaNode, Rectangle> mapaNodoARect = new HashMap<>();
@@ -109,12 +108,6 @@ public class JuegoController {
             }
         }
         conectarCasillasCorrectamente();
-        fichaEnTablero = new Circle(17, Color.WHITE);
-        fichaEnTablero.setStroke(Color.BLACK);
-        fichaEnTablero.setStrokeWidth(2);
-        fichaEnTablero.setMouseTransparent(true);
-        fichaEnTablero.setVisible(false);
-        rootPane.getChildren().add(fichaEnTablero);
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/triviaucab1/DadoView.fxml"));
@@ -163,12 +156,13 @@ public class JuegoController {
      * Actualiza toda la interfaz de usuario para reflejar al jugador que tiene el turno.
      * Esto incluye el Label del nombre, la ficha visual de quesitos, y la posición de la ficha en el tablero.
      */
+
     public void actualizarUIJugadorActual() {
         Jugador jugadorEnTurno = partida.getJugadorActual();
 
         if (jugadorEnTurno == null) {
             System.err.println("Error: No hay jugador en turno para actualizar la UI.");
-            fichaEnTablero.setVisible(false);
+            fichaEnTableroCanvas.setVisible(false);
             return;
         }
 
@@ -178,29 +172,33 @@ public class JuegoController {
 
         String idCasillaJugador = jugadorEnTurno.getCasillaActualId();
         if (idCasillaJugador == null || idCasillaJugador.isEmpty()) {
-
             idCasillaJugador = "c";
-            jugadorEnTurno.setCasillaActualId("c"); // Establece la casilla inicial si no tiene
+            jugadorEnTurno.setCasillaActualId("c");
         }
 
         CasillaNode casillaDelJugadorEnGrafo = mapaIDaNodo.get(idCasillaJugador);
 
         if (casillaDelJugadorEnGrafo == null) {
             System.err.println("❌ ERROR: La casilla '" + idCasillaJugador + "' del jugador no se encontró en el tablero.");
-            fichaEnTablero.setVisible(false);
+            fichaEnTableroCanvas.setVisible(false);
             return;
         }
-        fichaEnTablero.setLayoutX(casillaDelJugadorEnGrafo.getX());
-        fichaEnTablero.setLayoutY(casillaDelJugadorEnGrafo.getY());
-        fichaEnTablero.setVisible(true);
+        // Mueve el canvas a la posición de la casilla
+        fichaEnTableroCanvas.setLayoutX(casillaDelJugadorEnGrafo.getX() - fichaEnTableroCanvas.getWidth()/2);
+        fichaEnTableroCanvas.setLayoutY(casillaDelJugadorEnGrafo.getY() - fichaEnTableroCanvas.getHeight()/2);
+        fichaEnTableroCanvas.setVisible(true);
+
+        // DIBUJA la ficha decorada sobre el tablero central
+        dibujarFichaEnTablero(jugadorEnTurno);
+        // Dibuja la ficha en el canvas lateral
         dibujarFichaDelJugador(jugadorEnTurno);
 
         System.out.println("🔄 UI actualizada para: " + jugadorEnTurno.getAlias() + " en casilla: " + idCasillaJugador);
-        // Habilitar dado al comienzo del turno
         if (dadoController != null) {
             dadoController.habilitarBotonLanzar();
         }
     }
+
 
     /**
      * Dibuja la ficha del jugador dado en el Canvas dedicado.
@@ -223,6 +221,20 @@ public class JuegoController {
             System.out.println("Ficha visual dibujada para: " + jugador.getAlias());
         } else {
             System.err.println("Error: No se pudo dibujar la ficha. Canvas no inicializado o Jugador/Ficha es nulo.");
+        }
+    }
+
+    private void dibujarFichaEnTablero(Jugador jugador) {
+        if (fichaEnTableroCanvas != null && jugador != null && jugador.getFichaVisual() != null) {
+            GraphicsContext gc = fichaEnTableroCanvas.getGraphicsContext2D();
+            gc.clearRect(0, 0, fichaEnTableroCanvas.getWidth(), fichaEnTableroCanvas.getHeight());
+            Ficha fichaADibujar = jugador.getFichaVisual();
+            double canvasWidth = fichaEnTableroCanvas.getWidth();
+            double canvasHeight = fichaEnTableroCanvas.getHeight();
+            double radius = Math.min(canvasWidth, canvasHeight) / 2.2;
+            double centerX = canvasWidth / 2;
+            double centerY = canvasHeight / 2;
+            fichaADibujar.dibujar(gc, centerX, centerY, radius);
         }
     }
 
@@ -252,8 +264,10 @@ public class JuegoController {
                 System.err.println("Error grave: Casilla central 'c' no encontrada en el tablero. No se puede continuar.");
                 return;
             }
-            fichaEnTablero.setLayoutX(casillaActualDelJugador.getX());
-            fichaEnTablero.setLayoutY(casillaActualDelJugador.getY());
+            // AQUÍ ya NO debes mover fichaEnTablero, solo el canvas:
+            fichaEnTableroCanvas.setLayoutX(casillaActualDelJugador.getX() - fichaEnTableroCanvas.getWidth()/2);
+            fichaEnTableroCanvas.setLayoutY(casillaActualDelJugador.getY() - fichaEnTableroCanvas.getHeight()/2);
+            dibujarFichaEnTablero(jugadorEnTurno);
         }
 
         // Obtener todos los destinos posibles sin filtrar aún
@@ -319,8 +333,11 @@ public class JuegoController {
                     return;
                 }
                 jugadorEnTurno.setCasillaActualId(idDestino);
-                fichaEnTablero.setLayoutX(nodoDestino.getX());
-                fichaEnTablero.setLayoutY(nodoDestino.getY());
+                fichaEnTableroCanvas.setLayoutX(nodoDestino.getX() - fichaEnTableroCanvas.getWidth()/2);
+                fichaEnTableroCanvas.setLayoutY(nodoDestino.getY() - fichaEnTableroCanvas.getHeight()/2);
+                // Dibuja la ficha decorada sobre el tablero después de mover
+                dibujarFichaEnTablero(jugadorEnTurno);
+
                 movimientosPosibles.clear();
                 for (Rectangle r : mapaNodoARect.values()) {
                     r.setStroke(Color.BLACK);
@@ -329,8 +346,7 @@ public class JuegoController {
 
                 System.out.println("✅ Movimiento de " + jugadorEnTurno.getAlias() + " realizado a: " + idDestino);
                 puedeMover = false;
-                // Pequeña pausa para que el movimiento visual se asiente antes de la acción
-                PauseTransition pause = new PauseTransition(Duration.seconds(0.5)); // Reducido a 0.5 segundos
+                PauseTransition pause = new PauseTransition(Duration.seconds(0.5));
                 pause.setOnFinished(e -> {
                     manejarAccionDespuesDeMovimiento(jugadorEnTurno, nodoDestino);
                 });
@@ -343,7 +359,6 @@ public class JuegoController {
             System.out.println("No se hizo clic en una casilla válida.");
         }
     }
-
 
     // MÉTODO PARA MANEJAR LA ACCIÓN DESPUÉS DE QUE EL JUGADOR SE MUEVE
     private void manejarAccionDespuesDeMovimiento(Jugador jugador, CasillaNode casillaDestino) {
