@@ -8,11 +8,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.example.triviaucab1.module.Jugador;
 import org.example.triviaucab1.module.JsonService;
@@ -36,7 +32,8 @@ public class PartidaNuevaController implements Initializable {
     private ListView<Jugador> jugadoresDisponiblesListView;
     @FXML
     private ListView<Jugador> jugadoresSeleccionadosListView;
-
+    @FXML
+    private TextField tiempoRespuestaField;
     private ObservableList<Jugador> jugadoresDisponiblesObservable; // Renombrado para evitar conflicto con el método
     private ObservableList<Jugador> jugadoresSeleccionados;
     private JsonService jsonService;
@@ -158,6 +155,7 @@ public class PartidaNuevaController implements Initializable {
      * Maneja la acción cuando el botón "Jugar" es presionado.
      * Inicia una nueva partida con los jugadores seleccionados.
      */
+
     @FXML
     private void handleJugar(ActionEvent event) {
         if (jugadoresSeleccionados.isEmpty()) {
@@ -165,9 +163,27 @@ public class PartidaNuevaController implements Initializable {
             return;
         }
 
+        // Leer y validar el tiempo de respuesta ingresado
+        String textoTiempo = tiempoRespuestaField.getText().trim();
+        int tiempoRespuesta;
+        try {
+            tiempoRespuesta = Integer.parseInt(textoTiempo);
+            if (tiempoRespuesta <= 0) {
+                mostrarAlerta(Alert.AlertType.WARNING, "Valor inválido", "El tiempo debe ser un número mayor a 0.");
+                tiempoRespuestaField.requestFocus();
+                return; // NO avanza, espera que el usuario arregle el valor
+            }
+        } catch (Exception e) {
+            mostrarAlerta(Alert.AlertType.WARNING, "Valor inválido", "Debes ingresar un número válido para el tiempo de respuesta.");
+            tiempoRespuestaField.requestFocus();
+            return; // NO avanza, espera que el usuario arregle el valor
+        }
+
+        // Si llegaste aquí, el valor es válido
         // Crear una nueva partida y pasar los jugadores seleccionados (¡que ya tienen sus estadísticas fusionadas!)
         Partida nuevaPartida = new Partida();
         nuevaPartida.iniciar(new ArrayList<>(jugadoresSeleccionados)); // Pasa la lista de jugadores
+        nuevaPartida.setTiempoRespuesta(tiempoRespuesta);
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/triviaucab1/JuegoView.fxml"));
@@ -190,7 +206,6 @@ public class PartidaNuevaController implements Initializable {
             e.printStackTrace();
         }
     }
-
 
     /**
      * Maneja la acción cuando el botón "Regresar" es presionado.

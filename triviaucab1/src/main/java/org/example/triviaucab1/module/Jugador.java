@@ -27,6 +27,7 @@ public class Jugador {
     private String alias;
     private Set<String> quesitosGanados;
     private EstadisticasJugador estadisticas;
+    private int tiempoLimiteRespuesta;
     private String casillaActualId;
     @JsonIgnore
     private Ficha fichaVisual;
@@ -42,6 +43,13 @@ public class Jugador {
         this();
         this.email = email;
         this.alias = alias;
+    }
+
+    public int getTiempoLimiteRespuesta() {
+        return tiempoLimiteRespuesta;
+    }
+    public void setTiempoLimiteRespuesta(int tiempoLimiteRespuesta) {
+        this.tiempoLimiteRespuesta = tiempoLimiteRespuesta;
     }
 
     public String getEmail() { return email; }

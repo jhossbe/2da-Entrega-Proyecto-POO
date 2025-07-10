@@ -386,6 +386,8 @@ public class JuegoController {
 
                         preguntaController.setJuegoController(this);
                         preguntaController.setPregunta(finalPregunta);
+                        // PASO CLAVE: Pasa el tiempo límite desde la partida a la pregunta
+                        preguntaController.setTiempoLimiteSegundos(partida.getTiempoRespuesta());
 
                         Stage preguntaStage = new Stage();
                         preguntaStage.setScene(new Scene(root));
@@ -479,7 +481,11 @@ public class JuegoController {
     @FXML
     private void handleFinalizarPartida(ActionEvent event) {
         System.out.println("Partida finalizada.");
+
+        // ASIGNA EL TIEMPO LÍMITE A CADA JUGADOR ANTES DE GUARDAR ESTADÍSTICAS
         for (Jugador j : partida.getJugadores()) {
+            j.setTiempoLimiteRespuesta(partida.getTiempoRespuesta()); // <-- AQUÍ, ANTES DE guardar
+
             if (!j.tieneTodosLosQuesitos(totalCategoriasParaGanar)) {
                 j.getEstadisticas().incrementarPartidasJugadas();
                 j.getEstadisticas().incrementarPartidasPerdidas();
@@ -497,6 +503,7 @@ public class JuegoController {
     private void handleRendicion(ActionEvent event) {
         Jugador jugadorRendido = partida.getJugadorActual();
         if (jugadorRendido != null) {
+            jugadorRendido.setTiempoLimiteRespuesta(partida.getTiempoRespuesta()); // <-- AQUÍ, ANTES DE guardar
             System.out.println(jugadorRendido.getAlias() + " se ha rendido.");
             jugadorRendido.getEstadisticas().incrementarPartidasJugadas();
             jugadorRendido.getEstadisticas().incrementarPartidasPerdidas();
@@ -649,5 +656,4 @@ public class JuegoController {
             System.err.println("Error al cargar la vista del menú principal: " + e.getMessage());
         }
     }
-
 }

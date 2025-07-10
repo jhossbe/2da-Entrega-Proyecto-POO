@@ -6,13 +6,14 @@
     "partidasGanadas" : 0,
     "partidasPerdidas" : 10,
     "preguntasCorrectasTotal" : 1,
-    "preguntasIncorrectas" : 6,
+    "preguntasIncorrectas" : 9,
     "preguntasCorrectasPorCategoria" : {
       "Deportes" : 1
     },
     "tiempoTotalRespuestasCorrectas" : 19915
   },
-  "casillaActualId" : "49",
+  "tiempoLimiteRespuesta" : 0,
+  "casillaActualId" : "48",
   "quesitosGanadosNombres" : [ "Deportes" ]
 }, {
   "email" : "jugador1@example.com",
@@ -22,15 +23,16 @@
     "partidasGanadas" : 0,
     "partidasPerdidas" : 11,
     "preguntasCorrectasTotal" : 4,
-    "preguntasIncorrectas" : 14,
+    "preguntasIncorrectas" : 16,
     "preguntasCorrectasPorCategoria" : {
       "Arte y Literatura" : 2,
-      "Ciencia" : 1,
-      "Entretenimiento" : 1
+      "Entretenimiento" : 1,
+      "Ciencia" : 1
     },
     "tiempoTotalRespuestasCorrectas" : 111747
   },
-  "casillaActualId" : "65",
+  "tiempoLimiteRespuesta" : 0,
+  "casillaActualId" : "2",
   "quesitosGanadosNombres" : [ "Arte y Literatura", "Entretenimiento", "Ciencia" ]
 }, {
   "email" : "jugador4@example.com",
@@ -40,13 +42,14 @@
     "partidasGanadas" : 0,
     "partidasPerdidas" : 7,
     "preguntasCorrectasTotal" : 1,
-    "preguntasIncorrectas" : 7,
+    "preguntasIncorrectas" : 10,
     "preguntasCorrectasPorCategoria" : {
       "Geografía" : 1
     },
     "tiempoTotalRespuestasCorrectas" : 8165
   },
-  "casillaActualId" : "38",
+  "tiempoLimiteRespuesta" : 0,
+  "casillaActualId" : "16",
   "quesitosGanadosNombres" : [ "Geografía" ]
 }, {
   "email" : "jugador3@example.com",
@@ -56,11 +59,12 @@
     "partidasGanadas" : 0,
     "partidasPerdidas" : 8,
     "preguntasCorrectasTotal" : 0,
-    "preguntasIncorrectas" : 4,
+    "preguntasIncorrectas" : 7,
     "preguntasCorrectasPorCategoria" : { },
     "tiempoTotalRespuestasCorrectas" : 0
   },
-  "casillaActualId" : "4",
+  "tiempoLimiteRespuesta" : 0,
+  "casillaActualId" : "47",
   "quesitosGanadosNombres" : [ ]
 }, {
   "email" : "jugador6@example.com",
@@ -70,13 +74,14 @@
     "partidasGanadas" : 0,
     "partidasPerdidas" : 10,
     "preguntasCorrectasTotal" : 1,
-    "preguntasIncorrectas" : 9,
+    "preguntasIncorrectas" : 10,
     "preguntasCorrectasPorCategoria" : {
       "Entretenimiento" : 1
     },
     "tiempoTotalRespuestasCorrectas" : 4659
   },
-  "casillaActualId" : "2",
+  "tiempoLimiteRespuesta" : 0,
+  "casillaActualId" : "41",
   "quesitosGanadosNombres" : [ "Entretenimiento" ]
 }, {
   "email" : "jugador5@example.com",
@@ -86,10 +91,11 @@
     "partidasGanadas" : 0,
     "partidasPerdidas" : 8,
     "preguntasCorrectasTotal" : 0,
-    "preguntasIncorrectas" : 5,
+    "preguntasIncorrectas" : 9,
     "preguntasCorrectasPorCategoria" : { },
     "tiempoTotalRespuestasCorrectas" : 0
   },
+  "tiempoLimiteRespuesta" : 0,
   "casillaActualId" : "49",
   "quesitosGanadosNombres" : [ ]
 }, {
@@ -104,6 +110,7 @@
     "preguntasCorrectasPorCategoria" : { },
     "tiempoTotalRespuestasCorrectas" : 0
   },
+  "tiempoLimiteRespuesta" : 0,
   "casillaActualId" : "2",
   "quesitosGanadosNombres" : [ ]
 } ]

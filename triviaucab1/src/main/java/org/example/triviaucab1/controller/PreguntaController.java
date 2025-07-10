@@ -1,6 +1,8 @@
 package org.example.triviaucab1.controller;
 
+import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
+import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -19,6 +21,8 @@ public class PreguntaController {
     @FXML private Button continuarButton;
 
     private Pregunta preguntaActual;
+    private PauseTransition temporizador;
+    private int tiempoLimiteSegundos = 30; // valor por defecto
     private boolean respuestaCorrectaUsuario = false;
     private JuegoController juegoController;
 
@@ -27,6 +31,10 @@ public class PreguntaController {
 
     public void setJuegoController(JuegoController juegoController) {
         this.juegoController = juegoController;
+    }
+
+    public void setTiempoLimiteSegundos(int tiempoLimiteSegundos) {
+        this.tiempoLimiteSegundos = tiempoLimiteSegundos;
     }
 
     public void setPregunta(Pregunta pregunta) {
@@ -41,25 +49,56 @@ public class PreguntaController {
         resultadoLabel.setVisible(false);
         continuarButton.setVisible(false);
 
-        // --- INICIO DE CAMBIO ---
-        // Registrar el tiempo de inicio cuando la pregunta se muestra
         this.tiempoInicioRespuesta = System.currentTimeMillis();
-        System.out.println("⏱️ Temporizador de pregunta iniciado.");
-        // --- FIN DE CAMBIO ---
+
+        if (temporizador != null) {
+            temporizador.stop();
+        }
+        // ... dentro de setPregunta(Pregunta pregunta) ...
+        temporizador = new PauseTransition(javafx.util.Duration.seconds(tiempoLimiteSegundos));
+        temporizador.setOnFinished(e -> {
+            Platform.runLater(() -> {
+                if (!respuestaTextField.isDisabled()) {
+                    respuestaTextField.setDisable(true);
+                    enviarRespuestaButton.setDisable(true);
+                    resultadoLabel.setText("Se ha quedado sin tiempo para responder la pregunta");
+                    resultadoLabel.setTextFill(Color.ORANGE);
+                    resultadoLabel.setVisible(true);
+                    continuarButton.setVisible(true);
+
+                    // --- NUEVO: Notifica al controlador principal como respuesta incorrecta ---
+                    respuestaCorrectaUsuario = false;
+                    this.tiempoTranscurrido = tiempoLimiteSegundos * 1000; // El tiempo máximo permitido
+                    if (juegoController != null) {
+                        juegoController.notificarResultadoPregunta(false, preguntaActual.getCategoria(), this.tiempoTranscurrido);
+                    }
+                    // Cierra la ventana automáticamente después de un pequeño delay (opcional)
+                    PauseTransition autoClose = new PauseTransition(javafx.util.Duration.seconds(1));
+                    autoClose.setOnFinished(ev -> {
+                        Stage stage = (Stage) continuarButton.getScene().getWindow();
+                        stage.close();
+                    });
+                    autoClose.play();
+                }
+            });
+        });
+        temporizador.play();
     }
 
     /**
      * Inicializa el controlador, se llama automáticamente al cargar el FXML.
      * (Este comentario parece un remanente, el método initialize no está aquí, handleEnviarRespuesta se llama en acción del botón)
      */
+
     @FXML
     private void handleEnviarRespuesta(ActionEvent event) {
-        // --- INICIO DE CAMBIO ---
-        // Calcular el tiempo transcurrido cuando el usuario envía la respuesta
+        if (temporizador != null) {
+            temporizador.stop();
+        }
+
         long tiempoFinRespuesta = System.currentTimeMillis();
         this.tiempoTranscurrido = tiempoFinRespuesta - this.tiempoInicioRespuesta;
         System.out.println("⏱️ Tiempo de respuesta: " + tiempoTranscurrido + " ms");
-        // --- FIN DE CAMBIO ---
 
         String respuestaUsuario = respuestaTextField.getText();
         boolean esCorrecta = preguntaActual.esRespuestaCorrecta(respuestaUsuario);

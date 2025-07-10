@@ -18,6 +18,7 @@ public class Partida {
     private LocalDateTime fechaInicio;
     private LocalDateTime fechaFin;
     private boolean partidaTerminada;
+    private int tiempoRespuesta = 30; // Valor por defecto
     private long tiempoTotalSegundos;
     private Random random; // <--- AÑADE ESTE CAMPO
 
@@ -31,6 +32,14 @@ public class Partida {
         this.partidaTerminada = false;
         this.tiempoTotalSegundos = 0;
         this.random = new Random(); // <--- INICIALIZA Random
+    }
+
+    public int getTiempoRespuesta() {
+        return tiempoRespuesta;
+    }
+
+    public void setTiempoRespuesta(int tiempoRespuesta) {
+        this.tiempoRespuesta = tiempoRespuesta;
     }
 
     // El método `iniciar` debería encargarse de las posiciones iniciales y la configuración
