@@ -243,7 +243,7 @@ public class JuegoController {
         CasillaNode casillaDelJugadorEnGrafo = mapaIDaNodo.get(idCasillaJugador);
 
         if (casillaDelJugadorEnGrafo == null) {
-            System.err.println("❌ ERROR (JuegoController): La casilla '" + idCasillaJugador + "' del jugador no se encontró en el tablero. Reiniciando a 'c'.");
+            System.err.println("ERROR (JuegoController): La casilla '" + idCasillaJugador + "' del jugador no se encontró en el tablero. Reiniciando a 'c'.");
             // Intenta reubicar al jugador en la casilla central si la actual no se encuentra
             idCasillaJugador = "c";
             jugadorEnTurno.setCasillaActualId("c");
@@ -370,10 +370,10 @@ public class JuegoController {
             }
         }
 
-        System.out.println("DEBUG (JuegoController): 🎯 Movimientos posibles desde " + casillaActualDelJugador.getId() + " con dado " + valorDado + ":");
+        System.out.println("DEBUG (JuegoController): Movimientos posibles desde " + casillaActualDelJugador.getId() + " con dado " + valorDado + ":");
 
         if (movimientosPosibles.isEmpty()) {
-            System.out.println("DEBUG (JuegoController): ❌ No hay movimientos posibles (o todos fueron filtrados). Pasando el turno.");
+            System.out.println("DEBUG (JuegoController): No hay movimientos posibles (o todos fueron filtrados). Pasando el turno.");
             puedeMover = false;
             partida.siguienteTurno();
             actualizarUIJugadorActual();
@@ -387,7 +387,7 @@ public class JuegoController {
                 rect.setStrokeWidth(4);
                 System.out.println("DEBUG (JuegoController):    → " + destino.getId());
             } else {
-                System.err.println("DEBUG (JuegoController):    ⚠️ No se encontró rectángulo para casilla: " + destino.getId());
+                System.err.println("DEBUG (JuegoController): No se encontró rectángulo para casilla: " + destino.getId());
             }
         }
         if (dadoController != null) {
@@ -403,7 +403,7 @@ public class JuegoController {
     @FXML
     private void onCasillaClick(MouseEvent event) {
         if (!puedeMover) {
-            System.out.println("DEBUG (JuegoController): 🚫 No se puede mover en este momento (esperando lanzamiento de dado o acción).");
+            System.out.println("DEBUG (JuegoController): No se puede mover en este momento (esperando lanzamiento de dado o acción).");
             return;
         }
 
@@ -431,7 +431,7 @@ public class JuegoController {
                     r.setStrokeWidth(1);
                 }
 
-                System.out.println("DEBUG (JuegoController): ✅ Movimiento de " + jugadorEnTurno.getAlias() + " realizado a: " + idDestino);
+                System.out.println("DEBUG (JuegoController): Movimiento de " + jugadorEnTurno.getAlias() + " realizado a: " + idDestino);
                 puedeMover = false; // El jugador ya no puede mover hasta el siguiente turno
 
                 // Pequeña pausa para que el movimiento visual se asiente antes de la acción
@@ -442,7 +442,7 @@ public class JuegoController {
                 pause.play();
 
             } else {
-                System.out.println("DEBUG (JuegoController): ❌ Movimiento inválido a: " + idDestino + ". No es un destino posible.");
+                System.out.println("DEBUG (JuegoController): Movimiento inválido a: " + idDestino + ". No es un destino posible.");
             }
         } else {
             System.out.println("DEBUG (JuegoController): No se hizo clic en una casilla válida.");
