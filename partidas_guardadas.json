@@ -16,8 +16,8 @@
       },
       "tiempoTotalRespuestasCorrectas" : 106000
     },
-    "casillaActualId" : "49",
-    "quesitosGanadosNombres" : [ "Geografía", "Entretenimiento", "Ciencia" ]
+    "casillaActualId" : "c",
+    "quesitosGanadosNombres" : [ ]
   } ],
-  "tiempoRespuesta" : 1000
+  "tiempoRespuesta" : 10
 }
