@@ -1,67 +1,25 @@
 {
   "jugadores" : [ {
-    "email" : "jugador6@example.com",
-    "alias" : "Jugador6",
+    "email" : "jugador4@example.com",
+    "alias" : "Jugador4",
     "estadisticas" : {
-      "partidasJugadas" : 0,
-      "partidasGanadas" : 0,
-      "partidasPerdidas" : 0,
-      "preguntasCorrectasTotal" : 0,
-      "preguntasIncorrectas" : 8,
-      "preguntasCorrectasPorCategoria" : { },
-      "tiempoTotalRespuestasCorrectas" : 0
-    },
-    "casillaActualId" : "c",
-    "quesitosGanadosNombres" : [ ]
-  }, {
-    "email" : "jugador3@example.com",
-    "alias" : "Jugador3",
-    "estadisticas" : {
-      "partidasJugadas" : 0,
-      "partidasGanadas" : 0,
-      "partidasPerdidas" : 0,
-      "preguntasCorrectasTotal" : 0,
-      "preguntasIncorrectas" : 1,
-      "preguntasCorrectasPorCategoria" : { },
-      "tiempoTotalRespuestasCorrectas" : 0
-    },
-    "casillaActualId" : "c",
-    "quesitosGanadosNombres" : [ ]
-  }, {
-    "email" : "jugador7@example.com",
-    "alias" : "Jugador7",
-    "estadisticas" : {
-      "partidasJugadas" : 1,
-      "partidasGanadas" : 1,
-      "partidasPerdidas" : 0,
-      "preguntasCorrectasTotal" : 19,
-      "preguntasIncorrectas" : 5,
+      "partidasJugadas" : 3,
+      "partidasGanadas" : 2,
+      "partidasPerdidas" : 1,
+      "preguntasCorrectasTotal" : 8,
+      "preguntasIncorrectas" : 11,
       "preguntasCorrectasPorCategoria" : {
-        "Arte y Literatura" : 2,
-        "Entretenimiento" : 4,
-        "Geografía" : 4,
-        "Historia" : 6,
-        "Deportes" : 1,
-        "Ciencia" : 2
+        "Arte y Literatura" : 1,
+        "Entretenimiento" : 2,
+        "Geografía" : 1,
+        "Historia" : 1,
+        "Deportes" : 2,
+        "Ciencia" : 1
       },
-      "tiempoTotalRespuestasCorrectas" : 356000
-    },
-    "casillaActualId" : "c",
-    "quesitosGanadosNombres" : [ ]
-  }, {
-    "email" : "jugador5@example.com",
-    "alias" : "Jugador5",
-    "estadisticas" : {
-      "partidasJugadas" : 0,
-      "partidasGanadas" : 0,
-      "partidasPerdidas" : 0,
-      "preguntasCorrectasTotal" : 0,
-      "preguntasIncorrectas" : 5,
-      "preguntasCorrectasPorCategoria" : { },
-      "tiempoTotalRespuestasCorrectas" : 0
+      "tiempoTotalRespuestasCorrectas" : 151000
     },
     "casillaActualId" : "c",
     "quesitosGanadosNombres" : [ ]
   } ],
-  "tiempoRespuesta" : 100
+  "tiempoRespuesta" : 10
 }

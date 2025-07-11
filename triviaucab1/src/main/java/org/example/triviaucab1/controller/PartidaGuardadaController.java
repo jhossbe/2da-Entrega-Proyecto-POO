@@ -48,7 +48,7 @@ public class PartidaGuardadaController {
                 Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                 stage.setScene(new Scene(juegoRoot));
                 stage.setTitle("TRIVIA UCAB - Partida Guardada");
-                stage.setFullScreen(true);
+                stage.setMaximized(true);
                 stage.show();
                 System.out.println("Partida guardada cargada exitosamente.");
 

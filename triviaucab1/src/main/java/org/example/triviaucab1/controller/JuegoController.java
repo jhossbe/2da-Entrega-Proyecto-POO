@@ -516,28 +516,7 @@ public class JuegoController {
         System.out.println("DEBUG: Jugador actual FINAL (después de actualizar UI): " + (jugadorEnTurnoFinal != null ? jugadorEnTurnoFinal.getAlias() : "NULO"));
     }
 
-    /**
-     * Maneja la acción del botón "Finalizar Partida".
-     * Actualiza las estadísticas de todos los jugadores al final de la partida y regresa al menú principal.
-     * @param event El evento de acción.
-     */
-    @FXML
-    private void handleFinalizarPartida(ActionEvent event) {
-        System.out.println("Partida finalizada.");
-        for (Jugador j : partida.getJugadores()) {
-            if (!j.tieneTodosLosQuesitos(totalCategoriasParaGanar)) {
-                j.getEstadisticas().incrementarPartidasJugadas();
-                j.getEstadisticas().incrementarPartidasPerdidas();
-                gestorEstadisticas.actualizarEstadisticasJugador(j);
-            } else {
-                j.getEstadisticas().incrementarPartidasJugadas();
-                gestorEstadisticas.actualizarEstadisticasJugador(j);
-            }
-        }
-        partida.terminarPartida();
-        guardarPartidaActual();
-        handleRegresar(event);
-    }
+
 
     /**
      * Maneja la acción de rendición de un jugador.
@@ -658,7 +637,11 @@ public class JuegoController {
     @FXML
     private void handleRegresar(ActionEvent event) {
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        navigateToMenuPrincipal(stage);
+        navigateToMenuPrincipal(stage); // Cambia la escena
+
+        // Activar fullscreen después de cargar la nueva escena
+        stage.setFullScreen(true);
+
     }
 
     /**

@@ -219,7 +219,7 @@ public class PartidaNuevaController implements Initializable {
             Scene scene = new Scene(juegoRoot);
             stage.setScene(scene);
             stage.setTitle("Trivia UCAB - Juego");
-            stage.setFullScreen(true);
+            stage.setMaximized(true);
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
