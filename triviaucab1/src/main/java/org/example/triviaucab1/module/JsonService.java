@@ -2,7 +2,7 @@ package org.example.triviaucab1.module;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule; // Importa esta clase
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,16 +16,13 @@ import java.util.List;
 public class JsonService {
     private final ObjectMapper objectMapper;
     private static final String PARTIDAS_FILE = "partidas_guardadas.json";
-    private static final String JUGADORES_FILE = "jugadores.json"; // Asumiendo que existe para cargar jugadores
-    private static final String ESTADISTICAS_FILE = "estadisticasJugadores.json"; // Asumiendo que existe
+    private static final String JUGADORES_FILE = "jugadores.json";
+    private static final String ESTADISTICAS_FILE = "estadisticasJugadores.json";
 
     public JsonService() {
         objectMapper = new ObjectMapper();
-        // Registra el módulo para soportar tipos de fecha y hora de Java 8 (LocalDateTime, etc.)
         objectMapper.registerModule(new JavaTimeModule());
-        // Opcional: Configura para escribir fechas como cadenas ISO-8601 en lugar de timestamps
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-        // Opcional: Habilita la indentación para que el JSON sea más legible
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
     }
 
@@ -38,7 +35,7 @@ public class JsonService {
         try {
             File file = new File(PARTIDAS_FILE);
             if (!file.exists()) {
-                file.createNewFile(); // Crea el archivo si no existe
+                file.createNewFile();
             }
             objectMapper.writeValue(file, partida);
             System.out.println("Partida guardada exitosamente en " + PARTIDAS_FILE);
@@ -101,44 +98,6 @@ public class JsonService {
             System.out.println("Jugadores guardados exitosamente en " + JUGADORES_FILE);
         } catch (IOException e) {
             System.err.println("Error al guardar jugadores en JSON: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Carga las estadísticas globales de los jugadores desde un archivo JSON.
-     *
-     * @return Una lista de objetos Jugador con estadísticas globales.
-     */
-    public List<Jugador> cargarEstadisticasJugadoresGlobales() {
-        File file = new File(ESTADISTICAS_FILE);
-        if (file.exists() && file.length() > 0) {
-            try {
-                return objectMapper.readValue(file, objectMapper.getTypeFactory().constructCollectionType(List.class, Jugador.class));
-            } catch (IOException e) {
-                System.err.println("Error al cargar estadísticas globales desde JSON: " + e.getMessage());
-                e.printStackTrace();
-                return Collections.emptyList();
-            }
-        }
-        return Collections.emptyList();
-    }
-
-    /**
-     * Guarda las estadísticas globales de los jugadores en un archivo JSON.
-     *
-     * @param jugadoresConEstadisticas La lista de objetos Jugador con estadísticas a guardar.
-     */
-    public void guardarEstadisticasJugadoresGlobales(List<Jugador> jugadoresConEstadisticas) {
-        try {
-            File file = new File(ESTADISTICAS_FILE);
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-            objectMapper.writeValue(file, jugadoresConEstadisticas);
-            System.out.println("Estadísticas globales guardadas exitosamente en " + ESTADISTICAS_FILE);
-        } catch (IOException e) {
-            System.err.println("Error al guardar estadísticas globales en JSON: " + e.getMessage());
             e.printStackTrace();
         }
     }
