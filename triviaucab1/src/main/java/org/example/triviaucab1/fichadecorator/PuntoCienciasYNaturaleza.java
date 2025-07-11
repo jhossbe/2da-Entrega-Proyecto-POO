@@ -1,10 +1,15 @@
 package org.example.triviaucab1.fichadecorator;
 
-
 import javafx.scene.paint.Color;
 
+/**
+ * Decorador Concreto para la categoría Ciencias y Naturaleza.
+ * Colorea el segmento 3 de verde, delegando la lógica de dibujo al FichaDecorator.
+ */
 public class PuntoCienciasYNaturaleza extends FichaDecorator {
-    // Asignamos el segmento 3 a Ciencias y Naturaleza
+    /**
+     * Índice del segmento correspondiente a Ciencias y Naturaleza.
+     */
     private static final int SEGMENTO_CIENCIAS_NATURALEZA = 3;
 
     /**

@@ -7,7 +7,9 @@ import javafx.scene.paint.Color;
  * Colorea el segmento 0 de azul, delegando la lógica de dibujo al FichaDecorator.
  */
 public class PuntoGeografia extends FichaDecorator {
-    // Asignamos el segmento 0 a Geografía
+    /**
+     * Índice del segmento correspondiente a Geografía.
+     */
     private static final int SEGMENTO_GEOGRAFIA = 0;
 
     /**
