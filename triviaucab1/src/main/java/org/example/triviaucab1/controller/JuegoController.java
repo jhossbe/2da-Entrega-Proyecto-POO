@@ -637,16 +637,17 @@ public class JuegoController {
                 .filter(j -> !j.equals(jugadorRendido))
                 .collect(Collectors.toList());
 
-        boolean jugadorRendidoGanaPorQuesitos = true;
+        boolean jugadorRendidoGanaPorQuesitos = true; // Asumimos que gana hasta que se demuestre lo contrario
         if (!otrosJugadoresActivos.isEmpty()) {
             for (Jugador otroJugador : otrosJugadoresActivos) {
                 if (jugadorRendido.getQuesitosGanadosNombres().size() <= otroJugador.getQuesitosGanadosNombres().size()) {
                     jugadorRendidoGanaPorQuesitos = false;
-                    break;
+                    break; // Si encuentra un solo jugador con más o igual quesitos, no gana por rendición
                 }
             }
         } else {
             // Si no hay otros jugadores activos, el jugador actual no puede ganar por tener "más" quesitos
+            // En este caso, si se rinde siendo el último, es una derrota.
             jugadorRendidoGanaPorQuesitos = false;
         }
 
@@ -677,6 +678,13 @@ public class JuegoController {
 
         } else {
             System.out.println("DEBUG (JuegoController): " + jugadorRendido.getAlias() + " se ha rendido.");
+            Platform.runLater(() -> {
+                Alert alert = new Alert(AlertType.INFORMATION);
+                alert.setTitle("Rendición");
+                alert.setHeaderText("¡" + jugadorRendido.getAlias() + " se ha rendido!");
+                alert.setContentText("Te has rendido y la partida continúa para los demás jugadores.");
+                alert.showAndWait();
+            });
 
             jugadorRendido.getEstadisticas().incrementarPartidasJugadas();
             jugadorRendido.getEstadisticas().incrementarPartidasPerdidas();
@@ -724,7 +732,6 @@ public class JuegoController {
             navigateToMenuPrincipal(currentStage);
         });
     }
-
 
     /**
      * Método para guardar el estado actual de la partida en un archivo JSON.

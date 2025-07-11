@@ -9,15 +9,15 @@
     <center>
         <VBox alignment="CENTER" prefHeight="920.0" prefWidth="758.0" spacing="20.0">
             <children>
-            <Label graphicTextGap="5.0" prefHeight="114.0" prefWidth="474.0" text=" JUEGO TRIVIA ¿?  " textAlignment="CENTER" textFill="#8cb943" textOverrun="CLIP">
+            <Label graphicTextGap="5.0" prefHeight="114.0" prefWidth="526.0" text=" JUEGO TRIVIA¿🏆?  " textAlignment="CENTER" textFill="#9bd930" textOverrun="CLIP">
                <font>
                   <Font name="JetBrains Mono Bold Italic" size="49.0" />
                </font>
             </Label>
-                <Button fx:id="nuevaPartidaButton" mnemonicParsing="false" onAction="#handleNuevaPartida" prefHeight="50.0" prefWidth="200.0" text="Partida nueva" />
-                <Button fx:id="partidaGuardadaButton" mnemonicParsing="false" onAction="#handlePartidaGuardada" prefHeight="50.0" prefWidth="200.0" text="Partida guardada" />
-                <Button fx:id="estadisticasButton" mnemonicParsing="false" onAction="#handleEstadisticas" prefHeight="50.0" prefWidth="200.0" text="Estadísticas" />
-                <Button fx:id="salirButton" mnemonicParsing="false" onAction="#handleSalir" prefHeight="50.0" prefWidth="200.0" text="Salir" />
+                <Button fx:id="nuevaPartidaButton" mnemonicParsing="false" onAction="#handleNuevaPartida" prefHeight="50.0" prefWidth="200.0" style="-fx-background-color: #9bd930;" text="Partida nueva 🎲" />
+                <Button fx:id="partidaGuardadaButton" mnemonicParsing="false" onAction="#handlePartidaGuardada" prefHeight="50.0" prefWidth="200.0" style="-fx-background-color: #9bd930;" text="Partida guardada 🎮" />
+                <Button fx:id="estadisticasButton" mnemonicParsing="false" onAction="#handleEstadisticas" prefHeight="50.0" prefWidth="200.0" style="-fx-background-color: #9bd930;" text="Estadísticas  📈" />
+                <Button fx:id="salirButton" mnemonicParsing="false" onAction="#handleSalir" prefHeight="50.0" prefWidth="200.0" style="-fx-background-color: #9bd930;" text="Salir" />
             </children>
             <padding>
                 <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
