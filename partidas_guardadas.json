@@ -1,25 +1,23 @@
 {
   "jugadores" : [ {
-    "email" : "jugador4@example.com",
-    "alias" : "Jugador4",
+    "email" : "jugador2@example.com",
+    "alias" : "Jugador2",
     "estadisticas" : {
       "partidasJugadas" : 3,
-      "partidasGanadas" : 2,
-      "partidasPerdidas" : 1,
-      "preguntasCorrectasTotal" : 8,
+      "partidasGanadas" : 0,
+      "partidasPerdidas" : 3,
+      "preguntasCorrectasTotal" : 5,
       "preguntasIncorrectas" : 11,
       "preguntasCorrectasPorCategoria" : {
-        "Arte y Literatura" : 1,
-        "Entretenimiento" : 2,
         "Geografía" : 1,
+        "Entretenimiento" : 1,
         "Historia" : 1,
-        "Deportes" : 2,
-        "Ciencia" : 1
+        "Ciencia" : 2
       },
-      "tiempoTotalRespuestasCorrectas" : 151000
+      "tiempoTotalRespuestasCorrectas" : 106000
     },
-    "casillaActualId" : "c",
-    "quesitosGanadosNombres" : [ ]
+    "casillaActualId" : "49",
+    "quesitosGanadosNombres" : [ "Geografía", "Entretenimiento", "Ciencia" ]
   } ],
-  "tiempoRespuesta" : 10
+  "tiempoRespuesta" : 1000
 }
