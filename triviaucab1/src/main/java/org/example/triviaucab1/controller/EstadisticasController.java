@@ -13,6 +13,10 @@ import javafx.scene.Node; // Importar Node para handleRegresar y handleSalir
 import org.example.triviaucab1.module.GestorEstadisticas;
 import org.example.triviaucab1.module.Jugador; // Importar la clase Jugador
 
+
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleLongProperty;
+import javafx.beans.property.SimpleStringProperty;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -46,24 +50,39 @@ public class EstadisticasController implements Initializable {
         gestorEstadisticas = new GestorEstadisticas();
 
         aliasCol.setCellValueFactory(new PropertyValueFactory<>("alias"));
-        partidasJugadasCol.setCellValueFactory(cellData -> cellData.getValue().getEstadisticas().partidasJugadasProperty().asObject());
-        partidasGanadasCol.setCellValueFactory(cellData -> cellData.getValue().getEstadisticas().partidasGanadasProperty().asObject());
-        partidasPerdidasCol.setCellValueFactory(cellData -> cellData.getValue().getEstadisticas().partidasPerdidasProperty().asObject());
 
+        // Para columnas que obtienen de EstadisticasJugador y requieren envolver tipos primitivos
+        partidasJugadasCol.setCellValueFactory(cellData ->
+                new SimpleIntegerProperty(cellData.getValue().getEstadisticas().getPartidasJugadas()).asObject()
+        );
+        partidasGanadasCol.setCellValueFactory(cellData ->
+                new SimpleIntegerProperty(cellData.getValue().getEstadisticas().getPartidasGanadas()).asObject()
+        );
+        partidasPerdidasCol.setCellValueFactory(cellData ->
+                new SimpleIntegerProperty(cellData.getValue().getEstadisticas().getPartidasPerdidas()).asObject()
+        );
+
+        // Asegúrate de que estas columnas existan en tu FXML antes de acceder a ellas
         if (preguntasCorrectasColumn != null) {
-            preguntasCorrectasColumn.setCellValueFactory(cellData -> cellData.getValue().getEstadisticas().preguntasCorrectasTotalProperty().asObject());
+            preguntasCorrectasColumn.setCellValueFactory(cellData ->
+                    new SimpleIntegerProperty(cellData.getValue().getEstadisticas().getPreguntasCorrectasTotal()).asObject()
+            );
         }
         if (tiempoTotalRespuestaColumn != null) {
-            tiempoTotalRespuestaColumn.setCellValueFactory(cellData -> cellData.getValue().getEstadisticas().tiempoTotalRespuestasCorrectasProperty().asObject());
+            tiempoTotalRespuestaColumn.setCellValueFactory(cellData ->
+                    // Convertir milisegundos a segundos para mostrar
+                    new SimpleLongProperty(cellData.getValue().getEstadisticas().getTiempoTotalRespuestasCorrectas() / 1000).asObject()
+            );
         }
         if (quesitosColumn != null) {
             quesitosColumn.setCellValueFactory(cellData -> {
                 List<String> quesitos = cellData.getValue().getQuesitosGanadosNombres();
-                return new javafx.beans.property.SimpleStringProperty(String.join(", ", quesitos));
+                return new SimpleStringProperty(String.join(", ", quesitos));
             });
         }
         cargarEstadisticasEnTabla();
     }
+
 
     /**
      * Carga la lista de jugadores con sus estadísticas desde el GestorEstadisticas
@@ -72,7 +91,7 @@ public class EstadisticasController implements Initializable {
     private void cargarEstadisticasEnTabla() {
         List<Jugador> ranking = gestorEstadisticas.getRankingJugadores();
         estadisticasTableView.getItems().setAll(ranking);
-        System.out.println("📊 Estadísticas cargadas en la tabla. Total de jugadores: " + ranking.size());
+        System.out.println("Estadísticas cargadas en la tabla. Total de jugadores: " + ranking.size());
     }
 
     /**

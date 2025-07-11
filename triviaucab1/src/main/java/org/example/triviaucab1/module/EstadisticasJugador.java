@@ -14,82 +14,67 @@ import java.util.Map;
  * Clase para manejar las estadísticas de un jugador.
  */
 public class EstadisticasJugador {
-    private IntegerProperty partidasJugadas;
-    private IntegerProperty partidasGanadas;
-    private IntegerProperty partidasPerdidas;
-    private IntegerProperty preguntasCorrectasTotal;
-    private IntegerProperty preguntasIncorrectas;
-    private ObservableMap<String, Integer> preguntasCorrectasPorCategoria;
-    private LongProperty tiempoTotalRespuestasCorrectas;
+
+    private int partidasJugadas;
+    private int partidasGanadas;
+    private int partidasPerdidas;
+    private int preguntasCorrectasTotal;
+    private int preguntasIncorrectas;
+    private Map<String, Integer> preguntasCorrectasPorCategoria; // Cambiado de ObservableMap a Map
+    private long tiempoTotalRespuestasCorrectas;
 
     public EstadisticasJugador() {
-        this.partidasJugadas = new SimpleIntegerProperty(0);
-        this.partidasGanadas = new SimpleIntegerProperty(0);
-        this.partidasPerdidas = new SimpleIntegerProperty(0);
-        this.preguntasCorrectasTotal = new SimpleIntegerProperty(0);
-        this.preguntasIncorrectas = new SimpleIntegerProperty(0);
-        this.preguntasCorrectasPorCategoria = FXCollections.observableHashMap();
-        this.tiempoTotalRespuestasCorrectas = new SimpleLongProperty(0);
+        this.partidasJugadas = 0;
+        this.partidasGanadas = 0;
+        this.partidasPerdidas = 0;
+        this.preguntasCorrectasTotal = 0;
+        this.preguntasIncorrectas = 0;
+        this.preguntasCorrectasPorCategoria = new HashMap<>(); // Inicializar como HashMap
+        this.tiempoTotalRespuestasCorrectas = 0;
     }
 
-    // --- Getters, Setters y los métodos Property() para cada campo ---
+    public int getPartidasJugadas() { return partidasJugadas; }
+    public void setPartidasJugadas(int partidasJugadas) { this.partidasJugadas = partidasJugadas; }
 
-    public int getPartidasJugadas() { return partidasJugadas.get(); }
-    public void setPartidasJugadas(int partidasJugadas) { this.partidasJugadas.set(partidasJugadas); }
-    public IntegerProperty partidasJugadasProperty() { return partidasJugadas; } // Método Property
+    public int getPartidasGanadas() { return partidasGanadas; }
+    public void setPartidasGanadas(int partidasGanadas) { this.partidasGanadas = partidasGanadas; }
 
-    public int getPartidasGanadas() { return partidasGanadas.get(); }
-    public void setPartidasGanadas(int partidasGanadas) { this.partidasGanadas.set(partidasGanadas); }
-    public IntegerProperty partidasGanadasProperty() { return partidasGanadas; } // Método Property
+    public int getPartidasPerdidas() { return partidasPerdidas; }
+    public void setPartidasPerdidas(int partidasPerdidas) { this.partidasPerdidas = partidasPerdidas; }
 
-    public int getPartidasPerdidas() { return partidasPerdidas.get(); }
-    public void setPartidasPerdidas(int partidasPerdidas) { this.partidasPerdidas.set(partidasPerdidas); }
-    public IntegerProperty partidasPerdidasProperty() { return partidasPerdidas; } // Método Property
+    public int getPreguntasCorrectasTotal() { return preguntasCorrectasTotal; }
+    public void setPreguntasCorrectasTotal(int preguntasCorrectasTotal) { this.preguntasCorrectasTotal = preguntasCorrectasTotal; }
 
-    public int getPreguntasCorrectasTotal() { return preguntasCorrectasTotal.get(); }
-    public void setPreguntasCorrectasTotal(int preguntasCorrectasTotal) { this.preguntasCorrectasTotal.set(preguntasCorrectasTotal); }
-    public IntegerProperty preguntasCorrectasTotalProperty() { return preguntasCorrectasTotal; } // Método Property
+    public int getPreguntasIncorrectas() { return preguntasIncorrectas; }
+    public void setPreguntasIncorrectas(int preguntasIncorrectas) { this.preguntasIncorrectas = preguntasIncorrectas; }
 
-    public int getPreguntasIncorrectas() { return preguntasIncorrectas.get(); }
-    public void setPreguntasIncorrectas(int preguntasIncorrectas) { this.preguntasIncorrectas.set(preguntasIncorrectas); }
-    public IntegerProperty preguntasIncorrectasProperty() { return preguntasIncorrectas; } // Método Property
+    public Map<String, Integer> getPreguntasCorrectasPorCategoria() { return preguntasCorrectasPorCategoria; }
+    public void setPreguntasCorrectasPorCategoria(Map<String, Integer> preguntasCorrectasPorCategoria) { this.preguntasCorrectasPorCategoria = preguntasCorrectasPorCategoria; }
 
-    public Map<String, Integer> getPreguntasCorrectasPorCategoria() {
-        return new HashMap<>(preguntasCorrectasPorCategoria);
-    }
-    public void setPreguntasCorrectasPorCategoria(Map<String, Integer> preguntasCorrectasPorCategoria) {
-        this.preguntasCorrectasPorCategoria.clear();
-        if (preguntasCorrectasPorCategoria != null) {
-            this.preguntasCorrectasPorCategoria.putAll(preguntasCorrectasPorCategoria);
-        }
-    }
+    public long getTiempoTotalRespuestasCorrectas() { return tiempoTotalRespuestasCorrectas; }
+    public void setTiempoTotalRespuestasCorrectas(long tiempoTotalRespuestasCorrectas) { this.tiempoTotalRespuestasCorrectas = tiempoTotalRespuestasCorrectas; }
 
-    public ObservableMap<String, Integer> preguntasCorrectasPorCategoriaProperty() {
-        return preguntasCorrectasPorCategoria;
-    }
 
-    public long getTiempoTotalRespuestasCorrectas() { return tiempoTotalRespuestasCorrectas.get(); }
-    public void setTiempoTotalRespuestasCorrectas(long tiempoTotalRespuestasCorrectas) { this.tiempoTotalRespuestasCorrectas.set(tiempoTotalRespuestasCorrectas); }
-    public LongProperty tiempoTotalRespuestasCorrectasProperty() { return tiempoTotalRespuestasCorrectas; } // Método Property
+    // --- Métodos para actualizar estadísticas ---
 
     public void incrementarPartidasJugadas() {
-        this.partidasJugadas.set(this.partidasJugadas.get() + 1);
+        this.partidasJugadas++;
     }
 
     public void incrementarPartidasGanadas() {
-        this.partidasGanadas.set(this.partidasGanadas.get() + 1);
+        this.partidasGanadas++;
     }
 
     public void incrementarPartidasPerdidas() {
-        this.partidasPerdidas.set(this.partidasPerdidas.get() + 1);
+        this.partidasPerdidas++;
     }
 
     public void incrementarPreguntasCorrectasTotal() {
-        this.preguntasCorrectasTotal.set(this.preguntasCorrectasTotal.get() + 1);
+        this.preguntasCorrectasTotal++;
     }
 
     public void incrementarPreguntasIncorrectas() {
-        this.preguntasIncorrectas.set(this.preguntasIncorrectas.get() + 1);
+        this.preguntasIncorrectas++;
     }
 
     /**
@@ -106,6 +91,6 @@ public class EstadisticasJugador {
      * @param tiempoRespuesta El tiempo (en milisegundos, por ejemplo) de la última respuesta correcta.
      */
     public void añadirTiempoRespuestaCorrecta(long tiempoRespuesta) {
-        this.tiempoTotalRespuestasCorrectas.set(this.tiempoTotalRespuestasCorrectas.get() + tiempoRespuesta);
+        this.tiempoTotalRespuestasCorrectas += tiempoRespuesta;
     }
 }

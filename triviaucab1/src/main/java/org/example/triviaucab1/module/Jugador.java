@@ -31,9 +31,7 @@ public class Jugador {
     @JsonIgnore // Asegura que Jackson no intente serializar/deserializar este campo directamente
     private Ficha fichaVisual;
 
-    // Este campo existe en tu JSON de estadísticas, pero no lo necesitas en tu modelo actual.
-    // Lo declaramos y lo marcamos con @JsonIgnore para que Jackson lo ignore al deserializar.
-    @JsonIgnore // <-- ¡CRUCIAL! Ignora este campo al deserializar
+    @JsonIgnore
     private int tiempoLimiteRespuesta; // <-- ¡NUEVO! Añadido para que Jackson no falle si lo encuentra en el JSON
 
     /**
@@ -60,25 +58,6 @@ public class Jugador {
         this.alias = alias;
     }
 
-    // --- ¡IMPORTANTE! NO DEBE HABER OTROS CONSTRUCTORES CON @JsonProperty ---
-    // Si tenías un constructor como este que causaba problemas, asegúrate de que esté eliminado:
-    /*
-    public Jugador(
-            @JsonProperty("email") String email,
-            @JsonProperty("alias") String alias,
-            @JsonProperty("quesitosGanadosNombres") List<String> quesitosIniciales,
-            @JsonProperty("estadisticas") EstadisticasJugador estadisticas,
-            @JsonProperty("casillaActualId") String casillaActualId) {
-        this();
-        this.email = email;
-        this.alias = alias;
-        this.estadisticas = estadisticas;
-        this.casillaActualId = casillaActualId;
-        setQuesitosGanadosNombres(quesitosIniciales);
-    }
-    */
-    // --- FIN DE LA NOTA IMPORTANTE ---
-
 
     // --- Getters y Setters ---
     public String getEmail() { return email; }
@@ -87,6 +66,9 @@ public class Jugador {
     public void setAlias(String alias) { this.alias = alias; }
 
     public EstadisticasJugador getEstadisticas() {
+        if (this.estadisticas == null) {
+            this.estadisticas = new EstadisticasJugador();
+        }
         return estadisticas;
     }
 
@@ -97,7 +79,14 @@ public class Jugador {
     public String getCasillaActualId() { return casillaActualId; }
     public void setCasillaActualId(String casillaActualId) { this.casillaActualId = casillaActualId; }
 
-    public Ficha getFichaVisual() { return fichaVisual; }
+    @JsonIgnore
+    public Ficha getFichaVisual() {
+        if (this.fichaVisual == null) {
+            reconstruirFichaVisual();
+        }
+        return fichaVisual;
+    }
+
     public void setFichaVisual(Ficha fichaVisual) { this.fichaVisual = fichaVisual; }
 
     // Getter para Jackson al guardar en JSON o para lógica de juego
