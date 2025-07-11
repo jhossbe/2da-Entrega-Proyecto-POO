@@ -68,30 +68,78 @@ public class EstadisticasJugador implements Serializable {
      * @return El número de partidas jugadas.
      */
     public int getPartidasJugadas() { return partidasJugadas; }
+    /**
+     * Establece el número de partidas jugadas por el jugador.
+     * @param partidasJugadas El nuevo número de partidas jugadas.
+     */
+    public void setPartidasJugadas(int partidasJugadas) { this.partidasJugadas = partidasJugadas; }
 
     /**
      * Obtiene el número de partidas ganadas por el jugador.
      * @return El número de partidas ganadas.
      */
     public int getPartidasGanadas() { return partidasGanadas; }
+    /**
+     * Establece el número de partidas ganadas por el jugador.
+     * @param partidasGanadas El nuevo número de partidas ganadas.
+     */
+    public void setPartidasGanadas(int partidasGanadas) { this.partidasGanadas = partidasGanadas; }
 
     /**
      * Obtiene el número de partidas perdidas por el jugador.
      * @return El número de partidas perdidas.
      */
     public int getPartidasPerdidas() { return partidasPerdidas; }
+    /**
+     * Establece el número de partidas perdidas por el jugador.
+     * @param partidasPerdidas El nuevo número de partidas perdidas.
+     */
+    public void setPartidasPerdidas(int partidasPerdidas) { this.partidasPerdidas = partidasPerdidas; }
 
     /**
      * Obtiene el número total de preguntas correctas respondidas por el jugador.
      * @return El número total de preguntas correctas.
      */
     public int getPreguntasCorrectasTotal() { return preguntasCorrectasTotal; }
+    /**
+     * Establece el número total de preguntas correctas respondidas por el jugador.
+     * @param preguntasCorrectasTotal El nuevo número total de preguntas correctas.
+     */
+    public void setPreguntasCorrectasTotal(int preguntasCorrectasTotal) { this.preguntasCorrectasTotal = preguntasCorrectasTotal; }
+
+    /**
+     * Obtiene el número total de preguntas incorrectas respondidas por el jugador.
+     * @return El número total de preguntas incorrectas.
+     */
+    public int getPreguntasIncorrectas() { return preguntasIncorrectas; }
+    /**
+     * Establece el número total de preguntas incorrectas respondidas por el jugador.
+     * @param preguntasIncorrectas El nuevo número total de preguntas incorrectas.
+     */
+    public void setPreguntasIncorrectas(int preguntasIncorrectas) { this.preguntasIncorrectas = preguntasIncorrectas; }
+
+    /**
+     * Obtiene el mapa que contiene el conteo de preguntas correctas por categoría.
+     * @return Un mapa donde la clave es la categoría (String) y el valor es el conteo (Integer).
+     */
+    public Map<String, Integer> getPreguntasCorrectasPorCategoria() { return preguntasCorrectasPorCategoria; }
+    /**
+     * Establece el mapa de preguntas correctas por categoría.
+     * @param preguntasCorrectasPorCategoria El nuevo mapa de preguntas correctas por categoría.
+     */
+    public void setPreguntasCorrectasPorCategoria(Map<String, Integer> preguntasCorrectasPorCategoria) { this.preguntasCorrectasPorCategoria = preguntasCorrectasPorCategoria; }
 
     /**
      * Obtiene el tiempo total acumulado (en milisegundos) que el jugador ha tardado en responder correctamente.
      * @return El tiempo total de respuestas correctas en milisegundos.
      */
     public long getTiempoTotalRespuestasCorrectas() { return tiempoTotalRespuestasCorrectas; }
+    /**
+     * Establece el tiempo total acumulado (en milisegundos) que el jugador ha tardado en responder correctamente.
+     * @param tiempoTotalRespuestasCorrectas El nuevo tiempo total de respuestas correctas en milisegundos.
+     */
+    public void setTiempoTotalRespuestasCorrectas(long tiempoTotalRespuestasCorrectas) { this.tiempoTotalRespuestasCorrectas = tiempoTotalRespuestasCorrectas; }
+
 
     /**
      * Incrementa en uno el contador de partidas jugadas.
