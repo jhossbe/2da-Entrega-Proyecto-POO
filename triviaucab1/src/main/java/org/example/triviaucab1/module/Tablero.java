@@ -2,10 +2,21 @@ package org.example.triviaucab1.module;
 
 import java.util.HashMap;
 import java.util.Map;
-import javafx.scene.paint.Color;
 
+/**
+ * Clase que representa el tablero de juego de Trivia UCAB.
+ * Contiene un mapa de todas las casillas del tablero, accesibles por su ID de FXML,
+ * y define la ruta principal de casillas para el movimiento de los jugadores.
+ */
 public class Tablero {
+    /**
+     * Mapa que almacena las casillas del tablero, indexadas por su ID de FXML.
+     */
     private Map<String, Casilla> casillasPorId;
+    /**
+     * Array que define la secuencia de IDs de las casillas en la ruta principal del tablero.
+     * Esta ruta se utiliza para calcular los movimientos secuenciales de los jugadores.
+     */
     private String[] rutaPrincipalCasillaIds = {
             "casilla1", "casilla7", "casilla8", "casilla9", "casilla10", "casilla11",
             "casilla12", "casilla13", "casilla14", "casilla15", "casilla16", "casilla17",
@@ -18,102 +29,113 @@ public class Tablero {
 
     };
 
+    /**
+     * Constructor por defecto de la clase Tablero.
+     * Inicializa el mapa de casillas y procede a inicializar todas las casillas del tablero.
+     */
     public Tablero() {
         this.casillasPorId = new HashMap<>();
         inicializarCasillas();
     }
 
+    /**
+     * Inicializa todas las casillas del tablero con sus respectivos IDs, colores hexadecimales,
+     * y propiedades de si son casillas centrales o de quesito. Asigna una categoría a cada casilla
+     * basándose en su color.
+     */
     private void inicializarCasillas() {
 
         Map<String, String> colorCategoriaMap = new HashMap<>();
-        colorCategoriaMap.put("0x0018ecff", "Geografía"); // Azul
-        colorCategoriaMap.put("0xfbff00ff", "Historia"); // Amarillo
-        colorCategoriaMap.put("0xff9306ff", "Deportes y pasatiempos"); // Naranja
-        colorCategoriaMap.put("0x05eb25ff", "Ciencias y naturaleza"); // Verde
-        colorCategoriaMap.put("0xb703c4ff", "Arte y Literatura"); // Morado
-        colorCategoriaMap.put("0xff78f1ff", "Entretenimiento"); // Rosa
-        colorCategoriaMap.put("0xffffffff", "Especial"); // Blanco (Casillas especiales o de ruta)
-        colorCategoriaMap.put("0x000000ff", "Centro"); // Si la central es negra o sin color (se renderiza negra)
+        colorCategoriaMap.put("0x0018ecff", "Geografía");
+        colorCategoriaMap.put("0xfbff00ff", "Historia");
+        colorCategoriaMap.put("0xff9306ff", "Deportes y pasatiempos");
+        colorCategoriaMap.put("0x05eb25ff", "Ciencias y naturaleza");
+        colorCategoriaMap.put("0xb703c4ff", "Arte y Literatura");
+        colorCategoriaMap.put("0xff78f1ff", "Entretenimiento");
+        colorCategoriaMap.put("0xffffffff", "Especial");
+        colorCategoriaMap.put("0x000000ff", "Centro");
 
 
-        agregarCasilla("casilla1", "0x0018ecff", false, false); // Geografía
-        agregarCasilla("casilla2", "0xfbff00ff", false, false); // Historia
-        agregarCasilla("casilla3", "0xff9306ff", false, false); // Deportes
-        agregarCasilla("casilla4", "0x05eb25ff", false, false); // Ciencias
-        agregarCasilla("casilla5", "0xb703c4ff", false, false); // Arte
-        agregarCasilla("casilla6", "0xff78f1ff", false, false); // Entretenimiento
-        agregarCasilla("casilla7", "0xb703c4ff", false, false); // Arte
-        agregarCasilla("casilla8", "0xffffffff", true, false); // Especial / Quesito
-        agregarCasilla("casilla9", "0xff78f1ff", false, false); // Entretenimiento
-        agregarCasilla("casilla10", "0xffffffff", false, false); // Especial
-        agregarCasilla("casilla11", "0x05eb25ff", false, false); // Ciencias
-        agregarCasilla("casilla12", "0xff78f1ff", false, false); // Entretenimiento
-        agregarCasilla("casilla13", "0xffffffff", false, false); // Especial
-        agregarCasilla("casilla14", "0x0018ecff", false, false); // Geografía
-        agregarCasilla("casilla15", "0xffffffff", false, false); // Especial
-        agregarCasilla("casilla16", "0xb703c4ff", false, false); // Arte
-        agregarCasilla("casilla17", "0x0018ecff", false, false); // Geografía
-        agregarCasilla("casilla18", "0xffffffff", false, false); // Especial
-        agregarCasilla("casilla19", "0xfbff00ff", false, false); // Historia
-        agregarCasilla("casilla20", "0xffffffff", false, false); // Especial
-        agregarCasilla("casilla21", "0xff78f1ff", false, false); // Entretenimiento
-        agregarCasilla("casilla22", "0xfbff00ff", false, false); // Historia
-        agregarCasilla("casilla23", "0xffffffff", false, false); // Especial
-        agregarCasilla("casilla24", "0xff9306ff", false, false); // Deportes
-        agregarCasilla("casilla25", "0xffffffff", false, false); // Especial
-        agregarCasilla("casilla26", "0x0018ecff", false, false); // Geografía
-        agregarCasilla("casilla27", "0xff9306ff", false, false); // Deportes
-        agregarCasilla("casilla28", "0xffffffff", false, false); // Especial
-        agregarCasilla("casilla29", "0x05eb25ff", false, false); // Ciencias
-        agregarCasilla("casilla30Path", "0xffffffff", false, false); // Especial (Renombrado para evitar conflicto con ID 30 de la leyenda)
-        agregarCasilla("casilla31", "0xfbff00ff", false, false); // Historia
-        agregarCasilla("casilla32", "0x05eb25ff", false, false); // Ciencias
-        agregarCasilla("casilla33", "0xffffffff", false, false); // Especial
-        agregarCasilla("casilla34", "0xb703c4ff", false, false); // Arte
-        agregarCasilla("casilla35", "0xffffffff", false, false); // Especial
-        agregarCasilla("casilla36", "0xff9306ff", false, false); // Deportes
-        agregarCasilla("casilla37", "0xff78f1ff", false, false); // Entretenimiento
-        agregarCasilla("casilla38", "0xb703c4ff", false, false); // Arte
-        agregarCasilla("casilla39", "0x05eb25ff", false, false); // Ciencias
-        agregarCasilla("casilla40", "0xff9306ff", false, false); // Deportes
-        agregarCasilla("casilla41", "0xfbff00ff", false, false); // Historia
-        agregarCasilla("casilla42", "0xb703c4ff", false, false); // Arte
-        agregarCasilla("casilla43", "0xff78f1ff", false, false); // Entretenimiento
-        agregarCasilla("casilla44", "0x0018ecff", false, false); // Geografía
-        agregarCasilla("casilla45", "0xfbff00ff", false, false); // Historia
-        agregarCasilla("casilla46", "0xff9306ff", false, false); // Deportes
+        agregarCasilla("casilla1", "0x0018ecff", false, false);
+        agregarCasilla("casilla2", "0xfbff00ff", false, false);
+        agregarCasilla("casilla3", "0xff9306ff", false, false);
+        agregarCasilla("casilla4", "0x05eb25ff", false, false);
+        agregarCasilla("casilla5", "0xb703c4ff", false, false);
+        agregarCasilla("casilla6", "0xff78f1ff", false, false);
+        agregarCasilla("casilla7", "0xb703c4ff", false, false);
+        agregarCasilla("casilla8", "0xffffffff", true, false);
+        agregarCasilla("casilla9", "0xff78f1ff", false, false);
+        agregarCasilla("casilla10", "0xffffffff", false, false);
+        agregarCasilla("casilla11", "0x05eb25ff", false, false);
+        agregarCasilla("casilla12", "0xff78f1ff", false, false);
+        agregarCasilla("casilla13", "0xffffffff", false, false);
+        agregarCasilla("casilla14", "0x0018ecff", false, false);
+        agregarCasilla("casilla15", "0xffffffff", false, false);
+        agregarCasilla("casilla16", "0xb703c4ff", false, false);
+        agregarCasilla("casilla17", "0x0018ecff", false, false);
+        agregarCasilla("casilla18", "0xffffffff", false, false);
+        agregarCasilla("casilla19", "0xfbff00ff", false, false);
+        agregarCasilla("casilla20", "0xffffffff", false, false);
+        agregarCasilla("casilla21", "0xff78f1ff", false, false);
+        agregarCasilla("casilla22", "0xfbff00ff", false, false);
+        agregarCasilla("casilla23", "0xffffffff", false, false);
+        agregarCasilla("casilla24", "0xff9306ff", false, false);
+        agregarCasilla("casilla25", "0xffffffff", false, false);
+        agregarCasilla("casilla26", "0x0018ecff", false, false);
+        agregarCasilla("casilla27", "0xff9306ff", false, false);
+        agregarCasilla("casilla28", "0xffffffff", false, false);
+        agregarCasilla("casilla29", "0x05eb25ff", false, false);
+        agregarCasilla("casilla30Path", "0xffffffff", false, false);
+        agregarCasilla("casilla31", "0xfbff00ff", false, false);
+        agregarCasilla("casilla32", "0x05eb25ff", false, false);
+        agregarCasilla("casilla33", "0xffffffff", false, false);
+        agregarCasilla("casilla34", "0xb703c4ff", false, false);
+        agregarCasilla("casilla35", "0xffffffff", false, false);
+        agregarCasilla("casilla36", "0xff9306ff", false, false);
+        agregarCasilla("casilla37", "0xff78f1ff", false, false);
+        agregarCasilla("casilla38", "0xb703c4ff", false, false);
+        agregarCasilla("casilla39", "0x05eb25ff", false, false);
+        agregarCasilla("casilla40", "0xff9306ff", false, false);
+        agregarCasilla("casilla41", "0xfbff00ff", false, false);
+        agregarCasilla("casilla42", "0xb703c4ff", false, false);
+        agregarCasilla("casilla43", "0xff78f1ff", false, false);
+        agregarCasilla("casilla44", "0x0018ecff", false, false);
+        agregarCasilla("casilla45", "0xfbff00ff", false, false);
+        agregarCasilla("casilla46", "0xff9306ff", false, false);
 
-        // Ramificaciones (IDs 47 a 66)
-        agregarCasilla("casilla47", "0x0018ecff", false, false); // Geografía
-        agregarCasilla("casilla48", "0xff78f1ff", false, false); // Entretenimiento
-        agregarCasilla("casilla49", "0xb703c4ff", false, false); // Arte
-        agregarCasilla("casilla50", "0x05eb25ff", false, false); // Ciencias
-        agregarCasilla("casilla51", "0xff9306ff", false, false); // Deportes
+        agregarCasilla("casilla47", "0x0018ecff", false, false);
+        agregarCasilla("casilla48", "0xff78f1ff", false, false);
+        agregarCasilla("casilla49", "0xb703c4ff", false, false);
+        agregarCasilla("casilla50", "0x05eb25ff", false, false);
+        agregarCasilla("casilla51", "0xff9306ff", false, false);
 
-        agregarCasilla("casilla52", "0xff78f1ff", false, false); // Entretenimiento
-        agregarCasilla("casilla53", "0x0018ecff", false, false); // Geografía
-        agregarCasilla("casilla54", "0xfbff00ff", false, false); // Historia
-        agregarCasilla("casilla55", "0xff9306ff", false, false); // Deportes
-        agregarCasilla("casilla56", "0x05eb25ff", false, false); // Ciencias
+        agregarCasilla("casilla52", "0xff78f1ff", false, false);
+        agregarCasilla("casilla53", "0x0018ecff", false, false);
+        agregarCasilla("casilla54", "0xfbff00ff", false, false);
+        agregarCasilla("casilla55", "0xff9306ff", false, false);
+        agregarCasilla("casilla56", "0x05eb25ff", false, false);
 
-        agregarCasilla("casilla57", "0xfbff00ff", false, false); // Historia
-        agregarCasilla("casilla58", "0x0018ecff", false, false); // Geografía
-        agregarCasilla("casilla59", "0xff78f1ff", false, false); // Entretenimiento
-        agregarCasilla("casilla60", "0xb703c4ff", false, false); // Arte
-        agregarCasilla("casilla61", "0x05eb25ff", false, false); // Ciencias
+        agregarCasilla("casilla57", "0xfbff00ff", false, false);
+        agregarCasilla("casilla58", "0x0018ecff", false, false);
+        agregarCasilla("casilla59", "0xff78f1ff", false, false);
+        agregarCasilla("casilla60", "0xb703c4ff", false, false);
+        agregarCasilla("casilla61", "0x05eb25ff", false, false);
 
-        agregarCasilla("casilla62", "0x0018ecff", false, false); // Geografía
-        agregarCasilla("casilla63", "0xfbff00ff", false, false); // Historia
-        agregarCasilla("casilla64", "0xff9306ff", false, false); // Deportes
-        agregarCasilla("casilla65", "0x05eb25ff", false, false); // Ciencias
-        agregarCasilla("casilla66", "0xb703c4ff", false, false); // Arte
+        agregarCasilla("casilla62", "0x0018ecff", false, false);
+        agregarCasilla("casilla63", "0xfbff00ff", false, false);
+        agregarCasilla("casilla64", "0xff9306ff", false, false);
+        agregarCasilla("casilla65", "0x05eb25ff", false, false);
+        agregarCasilla("casilla66", "0xb703c4ff", false, false);
 
-        // Casilla Central
-        agregarCasilla("casillaCentral", "0x000000ff", true, false); // Es central
+        agregarCasilla("casillaCentral", "0x000000ff", true, false);
     }
 
     /**
-     * Helper para agregar casillas al mapa.
+     * Método auxiliar para añadir una casilla al mapa {@code casillasPorId}.
+     * @param fxId El ID de FXML de la casilla.
+     * @param colorHex El color hexadecimal de la casilla.
+     * @param esCentral Verdadero si la casilla es la casilla central del tablero.
+     * @param esQuesito Verdadero si la casilla es una casilla de quesito.
      */
     private void agregarCasilla(String fxId, String colorHex, boolean esCentral, boolean esQuesito) {
         String categoria = getColorToCategory(colorHex);
@@ -122,11 +144,11 @@ public class Tablero {
     }
 
     /**
-     * Convierte un color hexadecimal de JavaFX a la categoría correspondiente.
+     * Convierte un color hexadecimal de JavaFX a la categoría de pregunta correspondiente.
+     * @param colorHex El valor hexadecimal del color (ej. "0x0018ecff").
+     * @return La categoría de pregunta asociada al color, o "Desconocido" si el color no está mapeado.
      */
     private String getColorToCategory(String colorHex) {
-        // Normalizar el formato del color si es necesario (ej: "0xRRGGBBAAff")
-        // Asegúrate de que los colores que uses aquí coincidan con los de tu FXML
         switch (colorHex.toLowerCase()) {
             case "0x0018ecff": return "Geografía";
             case "0xfbff00ff": return "Historia";
@@ -134,27 +156,26 @@ public class Tablero {
             case "0x05eb25ff": return "Ciencias y naturaleza";
             case "0xb703c4ff": return "Arte y Literatura";
             case "0xff78f1ff": return "Entretenimiento";
-            case "0xffffffff": return "Especial"; // Casillas blancas
-            case "0x000000ff": return "Centro"; // Casilla central (si su color de fondo es negro o no tiene fill)
-            default: return "Desconocido"; // En caso de un color no mapeado
+            case "0xffffffff": return "Especial";
+            case "0x000000ff": return "Centro";
+            default: return "Desconocido";
         }
     }
 
     /**
-     * Obtiene una casilla por su ID de FXML.
+     * Obtiene un objeto Casilla por su ID de FXML.
      * @param fxId El ID de FXML de la casilla (ej. "casilla1", "casillaCentral").
-     * @return El objeto Casilla correspondiente.
+     * @return El objeto Casilla correspondiente al ID, o null si no se encuentra.
      */
     public Casilla getCasillaPorId(String fxId) {
         return casillasPorId.get(fxId);
     }
 
     /**
-     * Obtiene la lista ordenada de IDs de las casillas de la ruta principal.
-     * Esto es útil para calcular movimientos secuenciales.
+     * Obtiene la lista ordenada de IDs de las casillas que conforman la ruta principal del tablero.
+     * @return Un array de Strings con los IDs de las casillas de la ruta principal.
      */
     public String[] getRutaPrincipalCasillaIds() {
         return rutaPrincipalCasillaIds;
     }
-
 }

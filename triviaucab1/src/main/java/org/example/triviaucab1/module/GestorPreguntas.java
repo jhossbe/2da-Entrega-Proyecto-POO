@@ -7,16 +7,39 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
+/**
+ * Clase para gestionar la carga y el acceso a preguntas desde un archivo JSON.
+ * Organiza las preguntas por categoría y permite obtener preguntas aleatorias.
+ */
 public class GestorPreguntas {
+    /**
+     * Un mapa que almacena las preguntas, organizadas por categoría.
+     * La clave es el nombre de la categoría (String) y el valor es una lista de objetos Pregunta.
+     */
     private Map<String, List<Pregunta>> preguntasPorCategoria;
+    /**
+     * Una lista que contiene los nombres de todas las categorías de preguntas disponibles.
+     */
     private List<String> categoriasDisponibles;
 
+    /**
+     * Constructor para la clase GestorPreguntas.
+     * Inicializa el gestor y carga las preguntas desde el archivo JSON especificado.
+     * @param rutaArchivoJson La ruta del archivo JSON que contiene las preguntas.
+     */
     public GestorPreguntas(String rutaArchivoJson) {
         preguntasPorCategoria = new HashMap<>();
         categoriasDisponibles = new ArrayList<>();
         cargarPreguntas(rutaArchivoJson);
     }
 
+    /**
+     * Carga las preguntas desde un archivo JSON.
+     * El archivo JSON debe estar en el classpath y tener un formato de mapa donde las claves son las categorías
+     * y los valores son listas de preguntas.
+     * Establece la categoría para cada objeto Pregunta después de cargarlo.
+     * @param rutaArchivoJson La ruta del archivo JSON a cargar.
+     */
     private void cargarPreguntas(String rutaArchivoJson) {
         ObjectMapper mapper = new ObjectMapper();
         try (InputStream is = getClass().getResourceAsStream("/" + rutaArchivoJson)) {
@@ -24,18 +47,14 @@ public class GestorPreguntas {
                 System.err.println("Error: Archivo JSON no encontrado en la ruta: " + rutaArchivoJson);
                 return;
             }
-            // Leer el JSON como un mapa donde las claves son las categorías
             Map<String, List<Pregunta>> tempMap = mapper.readValue(is, new TypeReference<Map<String, List<Pregunta>>>() {});
 
-            // **MODIFICACIÓN CLAVE AQUÍ:**
-            // Iterar sobre cada categoría y establecer el nombre de la categoría
-            // para cada objeto Pregunta tan pronto como se cargan.
             for (Map.Entry<String, List<Pregunta>> entry : tempMap.entrySet()) {
                 String categoriaActual = entry.getKey();
                 List<Pregunta> preguntasDeEstaCategoria = entry.getValue();
 
                 for (Pregunta pregunta : preguntasDeEstaCategoria) {
-                    pregunta.setCategoria(categoriaActual); // Establece la categoría aquí
+                    pregunta.setCategoria(categoriaActual);
                 }
                 preguntasPorCategoria.put(categoriaActual, preguntasDeEstaCategoria);
             }
@@ -48,13 +67,20 @@ public class GestorPreguntas {
         }
     }
 
+    /**
+     * Obtiene una pregunta aleatoria de una categoría específica.
+     * Si la categoría es nula o no existe, selecciona una categoría aleatoria de las disponibles.
+     * @param categoria La categoría de la cual se desea obtener una pregunta. Puede ser nulo para una categoría aleatoria.
+     * @return Un objeto Pregunta aleatorio de la categoría especificada o de una categoría aleatoria,
+     * o null si no hay preguntas disponibles para la categoría o en general.
+     */
     public Pregunta getPreguntaAleatoria(String categoria) {
         List<Pregunta> listaPreguntas;
         String categoriaSeleccionada;
 
         if (categoria != null && preguntasPorCategoria.containsKey(categoria)) {
             listaPreguntas = preguntasPorCategoria.get(categoria);
-            categoriaSeleccionada = categoria; // Usar la categoría solicitada
+            categoriaSeleccionada = categoria;
         } else {
             if (categoriasDisponibles.isEmpty()) {
                 System.err.println("No hay categorías disponibles para obtener preguntas.");
@@ -76,6 +102,10 @@ public class GestorPreguntas {
         }
     }
 
+    /**
+     * Obtiene el número total de categorías de preguntas disponibles.
+     * @return El número de categorías disponibles.
+     */
     public int getTotalCategorias() {
         return categoriasDisponibles.size();
     }

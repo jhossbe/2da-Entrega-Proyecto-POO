@@ -13,10 +13,17 @@ public class FichaBase implements Ficha {
 
     private Color baseColor;
 
+    /**
+     * Constructor por defecto. Crea una ficha base de color blanco.
+     */
     public FichaBase() {
         this.baseColor = Color.WHITE;
     }
 
+    /**
+     * Constructor que permite especificar el color base de la ficha.
+     * @param color Color base de la ficha.
+     */
     public FichaBase(Color color) {
         this.baseColor = color;
     }
@@ -28,6 +35,13 @@ public class FichaBase implements Ficha {
         dibujarBordes(gc, x, y, radius);
     }
 
+    /**
+     * Dibuja los bordes de los segmentos y el borde exterior de la ficha.
+     * @param gc Contexto gráfico.
+     * @param x Coordenada X del centro.
+     * @param y Coordenada Y del centro.
+     * @param radius Radio de la ficha.
+     */
     public static void dibujarBordes(GraphicsContext gc, double x, double y, double radius) {
         gc.setStroke(Color.BLACK);
         gc.setLineWidth(2.0);

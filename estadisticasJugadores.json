@@ -51,15 +51,15 @@
   "email" : "jugador2@example.com",
   "alias" : "Jugador2",
   "estadisticas" : {
-    "partidasJugadas" : 0,
+    "partidasJugadas" : 1,
     "partidasGanadas" : 0,
-    "partidasPerdidas" : 0,
+    "partidasPerdidas" : 1,
     "preguntasCorrectasTotal" : 0,
-    "preguntasIncorrectas" : 1,
+    "preguntasIncorrectas" : 2,
     "preguntasCorrectasPorCategoria" : { },
     "tiempoTotalRespuestasCorrectas" : 0
   },
-  "casillaActualId" : "48",
+  "casillaActualId" : "44",
   "quesitosGanadosNombres" : [ ]
 }, {
   "email" : "jugador3@example.com",
@@ -95,14 +95,14 @@
   "email" : "jugador1@example.com",
   "alias" : "Jugador1",
   "estadisticas" : {
-    "partidasJugadas" : 0,
+    "partidasJugadas" : 1,
     "partidasGanadas" : 0,
-    "partidasPerdidas" : 0,
+    "partidasPerdidas" : 1,
     "preguntasCorrectasTotal" : 0,
-    "preguntasIncorrectas" : 1,
+    "preguntasIncorrectas" : 3,
     "preguntasCorrectasPorCategoria" : { },
     "tiempoTotalRespuestasCorrectas" : 0
   },
-  "casillaActualId" : "60",
+  "casillaActualId" : "58",
   "quesitosGanadosNombres" : [ ]
 } ]

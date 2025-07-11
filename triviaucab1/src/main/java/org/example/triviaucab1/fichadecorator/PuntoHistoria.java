@@ -7,7 +7,9 @@ import javafx.scene.paint.Color;
  * Colorea el segmento 1 de amarillo, delegando la lógica de dibujo al FichaDecorator.
  */
 public class PuntoHistoria extends FichaDecorator {
-    // Asignamos el segmento 1 a Historia
+    /**
+     * Índice del segmento correspondiente a Historia.
+     */
     private static final int SEGMENTO_HISTORIA = 1;
 
     /**
@@ -19,4 +21,3 @@ public class PuntoHistoria extends FichaDecorator {
         super(fichaDecorada, Color.YELLOW, SEGMENTO_HISTORIA);
     }
 }
-

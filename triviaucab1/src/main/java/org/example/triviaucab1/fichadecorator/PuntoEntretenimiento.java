@@ -7,7 +7,9 @@ import javafx.scene.paint.Color;
  * Colorea el segmento 5 de rosado, delegando la lógica de dibujo al FichaDecorator.
  */
 public class PuntoEntretenimiento extends FichaDecorator {
-    // Asignamos el segmento 5 a Entretenimiento
+    /**
+     * Índice del segmento correspondiente a Entretenimiento.
+     */
     private static final int SEGMENTO_ENTRETENIMIENTO = 5;
 
     /**
@@ -19,4 +21,3 @@ public class PuntoEntretenimiento extends FichaDecorator {
         super(fichaDecorada, Color.PINK, SEGMENTO_ENTRETENIMIENTO);
     }
 }
-

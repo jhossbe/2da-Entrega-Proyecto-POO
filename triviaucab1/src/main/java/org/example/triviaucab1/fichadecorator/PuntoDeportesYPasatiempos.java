@@ -7,7 +7,9 @@ import javafx.scene.paint.Color;
  * Colorea el segmento 2 de naranja, delegando la lógica de dibujo al FichaDecorator.
  */
 public class PuntoDeportesYPasatiempos extends FichaDecorator {
-    // Asignamos el segmento 2 a Deportes y Pasatiempos
+    /**
+     * Índice del segmento correspondiente a Deportes y Pasatiempos.
+     */
     private static final int SEGMENTO_DEPORTES_PASATIEMPOS = 2;
 
     /**

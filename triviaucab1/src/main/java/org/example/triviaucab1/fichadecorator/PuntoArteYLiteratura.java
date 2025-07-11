@@ -7,7 +7,9 @@ import javafx.scene.paint.Color;
  * Colorea el segmento 4 de morado, delegando la lógica de dibujo al FichaDecorator.
  */
 public class PuntoArteYLiteratura extends FichaDecorator {
-    // Asignamos el segmento 4 a Arte y Literatura
+    /**
+     * Índice del segmento correspondiente a Arte y Literatura.
+     */
     private static final int SEGMENTO_ARTE_LITERATURA = 4;
 
     /**
@@ -19,4 +21,3 @@ public class PuntoArteYLiteratura extends FichaDecorator {
         super(fichaDecorada, Color.PURPLE, SEGMENTO_ARTE_LITERATURA);
     }
 }
-
